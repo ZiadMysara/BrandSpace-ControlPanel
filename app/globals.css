@@ -1,0 +1,694 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* COMPLETE CSS RESET - NO YELLOW ANYWHERE */
+@layer base {
+  :root {
+    --background: 248 250 252;
+    --foreground: 51 65 85;
+    --card: 255 255 255;
+    --card-foreground: 51 65 85;
+    --popover: 255 255 255;
+    --popover-foreground: 51 65 85;
+    --primary: 59 130 246;
+    --primary-foreground: 255 255 255;
+    --secondary: 248 250 252;
+    --secondary-foreground: 51 65 85;
+    --muted: 248 250 252;
+    --muted-foreground: 100 116 139;
+    --accent: 248 250 252;
+    --accent-foreground: 51 65 85;
+    --destructive: 239 68 68;
+    --destructive-foreground: 255 255 255;
+    --border: 226 232 240;
+    --input: 255 255 255;
+    --ring: 59 130 246;
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 15 23 42;
+    --foreground: 248 250 252;
+    --card: 30 41 59;
+    --card-foreground: 248 250 252;
+    --popover: 30 41 59;
+    --popover-foreground: 248 250 252;
+    --primary: 59 130 246;
+    --primary-foreground: 255 255 255;
+    --secondary: 51 65 85;
+    --secondary-foreground: 248 250 252;
+    --muted: 51 65 85;
+    --muted-foreground: 148 163 184;
+    --accent: 51 65 85;
+    --accent-foreground: 248 250 252;
+    --destructive: 239 68 68;
+    --destructive-foreground: 248 250 252;
+    --border: 51 65 85;
+    --input: 51 65 85;
+    --ring: 59 130 246;
+  }
+}
+
+/* NUCLEAR RESET - ELIMINATE ALL YELLOW */
+* {
+  border-color: rgb(226 232 240) !important;
+}
+
+*:focus {
+  outline: 2px solid rgb(59 130 246) !important;
+  outline-offset: 2px !important;
+  border-color: rgb(59 130 246) !important;
+  box-shadow: 0 0 0 2px rgb(59 130 246 / 0.2) !important;
+}
+
+*:focus-visible {
+  outline: 2px solid rgb(59 130 246) !important;
+  outline-offset: 2px !important;
+  border-color: rgb(59 130 246) !important;
+  box-shadow: 0 0 0 2px rgb(59 130 246 / 0.2) !important;
+}
+
+/* FORCE ALL INPUTS TO BE WHITE/BLUE */
+input,
+textarea,
+select,
+button {
+  background-color: rgb(255 255 255) !important;
+  border-color: rgb(226 232 240) !important;
+  color: rgb(51 65 85) !important;
+}
+
+/* FORCE GRAY PLACEHOLDER TEXT */
+input::placeholder,
+textarea::placeholder {
+  color: rgb(100 116 139) !important;
+  opacity: 1 !important;
+}
+
+input::-webkit-input-placeholder,
+textarea::-webkit-input-placeholder {
+  color: rgb(100 116 139) !important;
+  opacity: 1 !important;
+}
+
+input::-moz-placeholder,
+textarea::-moz-placeholder {
+  color: rgb(100 116 139) !important;
+  opacity: 1 !important;
+}
+
+input:-ms-input-placeholder,
+textarea:-ms-input-placeholder {
+  color: rgb(100 116 139) !important;
+  opacity: 1 !important;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  background-color: rgb(255 255 255) !important;
+  border-color: rgb(59 130 246) !important;
+  outline: 2px solid rgb(59 130 246) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 2px rgb(59 130 246 / 0.2) !important;
+}
+
+/* OVERRIDE BROWSER DEFAULTS */
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="search"]:focus,
+input[type="number"]:focus,
+textarea:focus,
+select:focus {
+  background-color: rgb(255 255 255) !important;
+  border-color: rgb(59 130 246) !important;
+  outline: 2px solid rgb(59 130 246) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 2px rgb(59 130 246 / 0.2) !important;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html,
+  body {
+    @apply bg-slate-50 text-slate-900;
+    background-color: rgb(248 250 252) !important;
+    color: rgb(51 65 85) !important;
+  }
+}
+
+/* FALCON STYLES - CLEAN SLATE */
+.falcon-dashboard {
+  min-height: 100vh;
+  background-color: rgb(248 250 252) !important;
+}
+
+.falcon-sidebar {
+  background-color: rgb(255 255 255) !important;
+  border-right: 1px solid rgb(226 232 240);
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+}
+
+.falcon-sidebar-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid rgb(241 245 249);
+}
+
+.falcon-sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.falcon-sidebar-logo {
+  width: 2rem;
+  height: 2rem;
+  background-color: rgb(59 130 246);
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.falcon-sidebar-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: rgb(15 23 42);
+}
+
+.falcon-sidebar-subtitle {
+  font-size: 0.75rem;
+  color: rgb(100 116 139);
+}
+
+.falcon-nav-section {
+  padding: 0.5rem 1rem;
+}
+
+.falcon-nav-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgb(100 116 139);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.75rem;
+  padding: 0 0.5rem;
+}
+
+.falcon-nav-item {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgb(71 85 105);
+  border-radius: 0.5rem;
+  margin-bottom: 0.25rem;
+  transition: all 150ms;
+  text-decoration: none;
+}
+
+.falcon-nav-item:hover {
+  background-color: rgb(241 245 249) !important;
+  color: rgb(15 23 42) !important;
+}
+
+.falcon-nav-item.active {
+  background-color: rgb(239 246 255) !important;
+  color: rgb(29 78 216) !important;
+  font-weight: 600;
+}
+
+.falcon-nav-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-right: 0.75rem;
+  flex-shrink: 0;
+}
+
+.falcon-main {
+  flex: 1;
+  background-color: rgb(248 250 252) !important;
+}
+
+.falcon-header {
+  background-color: rgb(255 255 255) !important;
+  border-bottom: 1px solid rgb(226 232 240);
+  padding: 1rem 1.5rem;
+}
+
+.falcon-page-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: rgb(15 23 42);
+  margin-bottom: 0.25rem;
+}
+
+.falcon-page-subtitle {
+  color: rgb(100 116 139);
+}
+
+.falcon-card {
+  background-color: rgb(255 255 255) !important;
+  border-radius: 0.75rem;
+  border: 1px solid rgb(226 232 240);
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  transition: all 200ms;
+}
+
+.falcon-card:hover {
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+.falcon-card-header {
+  padding: 1.5rem;
+  padding-bottom: 1rem;
+}
+
+.falcon-card-content {
+  padding: 1.5rem;
+  padding-top: 0;
+}
+
+.falcon-card-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: rgb(15 23 42);
+  margin-bottom: 0.25rem;
+}
+
+.falcon-card-description {
+  font-size: 0.875rem;
+  color: rgb(100 116 139);
+}
+
+.falcon-search {
+  position: relative;
+}
+
+.falcon-search-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem 0.5rem 2.5rem;
+  border: 1px solid rgb(226 232 240) !important;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  background-color: rgb(248 250 252) !important;
+  color: rgb(51 65 85) !important;
+}
+
+.falcon-search-input::placeholder {
+  color: rgb(100 116 139) !important;
+  opacity: 1 !important;
+}
+
+.falcon-search-input:focus {
+  background-color: rgb(255 255 255) !important;
+  border-color: rgb(59 130 246) !important;
+  outline: 2px solid rgb(59 130 246) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 2px rgb(59 130 246 / 0.2) !important;
+}
+
+.falcon-search-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgb(148 163 184);
+  width: 1rem;
+  height: 1rem;
+}
+
+.falcon-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border: 1px solid transparent;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 0.5rem;
+  transition: all 150ms;
+  text-decoration: none;
+}
+
+.falcon-btn:focus {
+  outline: 2px solid rgb(59 130 246) !important;
+  outline-offset: 2px !important;
+}
+
+.falcon-btn-primary {
+  background-color: rgb(59 130 246) !important;
+  color: rgb(255 255 255) !important;
+}
+
+.falcon-btn-primary:hover {
+  background-color: rgb(29 78 216) !important;
+}
+
+.falcon-btn-outline {
+  background-color: rgb(255 255 255) !important;
+  color: rgb(100 116 139) !important;
+  border-color: rgb(226 232 240) !important;
+}
+
+.falcon-btn-outline:hover {
+  background-color: rgb(248 250 252) !important;
+  color: rgb(71 85 105) !important;
+}
+
+.falcon-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgb(226 232 240) !important;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  background-color: rgb(255 255 255) !important;
+  color: rgb(51 65 85) !important;
+}
+
+.falcon-input::placeholder {
+  color: rgb(100 116 139) !important;
+  opacity: 1 !important;
+}
+
+.falcon-input:focus {
+  border-color: rgb(59 130 246) !important;
+  outline: 2px solid rgb(59 130 246) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 2px rgb(59 130 246 / 0.2) !important;
+}
+
+.falcon-select {
+  width: 100%;
+  padding: 0.5rem 2.5rem 0.5rem 0.75rem;
+  border: 1px solid rgb(226 232 240) !important;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  background-color: rgb(255 255 255) !important;
+  color: rgb(51 65 85) !important;
+  cursor: pointer;
+}
+
+.falcon-select:focus {
+  border-color: rgb(59 130 246) !important;
+  outline: 2px solid rgb(59 130 246) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 2px rgb(59 130 246 / 0.2) !important;
+}
+
+.falcon-textarea {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgb(226 232 240) !important;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  background-color: rgb(255 255 255) !important;
+  color: rgb(51 65 85) !important;
+  resize: none;
+}
+
+.falcon-textarea::placeholder {
+  color: rgb(100 116 139) !important;
+  opacity: 1 !important;
+}
+
+.falcon-textarea:focus {
+  border-color: rgb(59 130 246) !important;
+  outline: 2px solid rgb(59 130 246) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 2px rgb(59 130 246 / 0.2) !important;
+}
+
+.falcon-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgb(71 85 105);
+  margin-bottom: 0.5rem;
+}
+
+.falcon-table-container {
+  border-radius: 0.75rem;
+  border: 1px solid rgb(226 232 240);
+  overflow: hidden;
+  background-color: rgb(255 255 255) !important;
+}
+
+.falcon-table {
+  width: 100%;
+}
+
+.falcon-table thead {
+  background-color: rgb(248 250 252) !important;
+}
+
+.falcon-table th {
+  padding: 1rem 1.5rem;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgb(71 85 105);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.falcon-table td {
+  padding: 1rem 1.5rem;
+  white-space: nowrap;
+  font-size: 0.875rem;
+  color: rgb(15 23 42);
+  border-top: 1px solid rgb(241 245 249);
+}
+
+.falcon-table tbody tr:hover {
+  background-color: rgb(248 250 252) !important;
+}
+
+.falcon-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.falcon-badge.success {
+  background-color: rgb(220 252 231) !important;
+  color: rgb(22 101 52) !important;
+}
+
+.falcon-badge.warning {
+  background-color: rgb(254 215 170) !important;
+  color: rgb(154 52 18) !important;
+}
+
+.falcon-badge.danger {
+  background-color: rgb(254 226 226) !important;
+  color: rgb(153 27 27) !important;
+}
+
+.falcon-badge.info {
+  background-color: rgb(219 234 254) !important;
+  color: rgb(30 64 175) !important;
+}
+
+.falcon-dropdown {
+  position: absolute;
+  right: 0;
+  margin-top: 0.5rem;
+  width: 14rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  background-color: rgb(255 255 255) !important;
+  border: 1px solid rgb(0 0 0 / 0.05);
+  z-index: 50;
+}
+
+.falcon-dropdown-item {
+  display: block;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  color: rgb(71 85 105) !important;
+  cursor: pointer;
+}
+
+.falcon-dropdown-item:hover {
+  background-color: rgb(241 245 249) !important;
+  color: rgb(15 23 42) !important;
+}
+
+.falcon-grid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.falcon-grid-1 {
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+.falcon-grid-2 {
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+.falcon-grid-3 {
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+.falcon-grid-4 {
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+@media (min-width: 640px) {
+  .falcon-grid-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 768px) {
+  .falcon-grid-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .falcon-grid-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .falcon-grid-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .falcon-grid-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* NUCLEAR DIALOG/MODAL OVERRIDES - NO YELLOW EVER */
+[data-radix-dialog-overlay] {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+}
+
+[data-radix-dialog-content],
+[role="dialog"],
+.dialog-content,
+.modal-content,
+div[role="dialog"] {
+  background-color: rgb(255 255 255) !important;
+  border: 1px solid rgb(226 232 240) !important;
+  border-radius: 0.75rem !important;
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25) !important;
+  color: rgb(51 65 85) !important;
+}
+
+/* Target the specific dialog header */
+[data-radix-dialog-content] > div:first-child,
+[role="dialog"] > div:first-child,
+.dialog-header {
+  background-color: rgb(255 255 255) !important;
+  color: rgb(15 23 42) !important;
+  border-bottom: 1px solid rgb(241 245 249) !important;
+  padding: 1.5rem !important;
+}
+
+/* Target dialog title */
+[data-radix-dialog-title],
+.dialog-title,
+h2[id*="dialog"] {
+  color: rgb(15 23 42) !important;
+  font-size: 1.125rem !important;
+  font-weight: 600 !important;
+  background-color: transparent !important;
+}
+
+/* Target dialog description */
+[data-radix-dialog-description],
+.dialog-description {
+  color: rgb(100 116 139) !important;
+  background-color: transparent !important;
+}
+
+/* Target dialog content area */
+[data-radix-dialog-content] form,
+[role="dialog"] form,
+.dialog-body {
+  background-color: rgb(255 255 255) !important;
+  padding: 1.5rem !important;
+}
+
+/* Target dialog footer */
+[data-radix-dialog-content] > div:last-child,
+[role="dialog"] > div:last-child,
+.dialog-footer {
+  background-color: rgb(255 255 255) !important;
+  border-top: 1px solid rgb(241 245 249) !important;
+  padding: 1.5rem !important;
+}
+
+/* Override any yellow backgrounds in dialogs */
+[data-radix-dialog-content] *,
+[role="dialog"] *,
+.dialog-content * {
+  background-color: inherit !important;
+}
+
+/* Force white background on dialog containers */
+[data-radix-dialog-content] > *,
+[role="dialog"] > * {
+  background-color: rgb(255 255 255) !important;
+}
+
+/* Target close button */
+[data-radix-dialog-close],
+.dialog-close {
+  color: rgb(100 116 139) !important;
+  background-color: transparent !important;
+}
+
+[data-radix-dialog-close]:hover,
+.dialog-close:hover {
+  color: rgb(51 65 85) !important;
+  background-color: rgb(241 245 249) !important;
+}
+
+/* EMERGENCY OVERRIDE - ANY ELEMENT WITH YELLOW */
+*[style*="background-color: yellow"],
+*[style*="background: yellow"],
+*[style*="background-color: #ffff00"],
+*[style*="background: #ffff00"],
+*[style*="background-color: #ff0"],
+*[style*="background: #ff0"],
+*[class*="bg-yellow"] {
+  background-color: rgb(255 255 255) !important;
+  color: rgb(51 65 85) !important;
+}
+
+/* FINAL NUCLEAR OPTION */
+body * {
+  background-color: inherit !important;
+}
+
+body {
+  background-color: rgb(248 250 252) !important;
+}
+
+/* Force all containers to be white or slate */
+.falcon-card,
+[data-radix-dialog-content],
+[role="dialog"],
+.dialog-content,
+.modal-content {
+  background-color: rgb(255 255 255) !important;
+}
+
+/* Force all text to be dark */
+body,
+body * {
+  color: rgb(51 65 85) !important; /* Force dark gray text color */
+}
