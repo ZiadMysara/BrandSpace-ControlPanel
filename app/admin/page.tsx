@@ -19,12 +19,14 @@ import {
   MessageSquare,
   Eye,
   Clock,
+  AlertTriangle,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function FalconDashboard() {
   const [locale, setLocale] = useState<"en" | "ar">("en")
-  const { stats, recentActivities, loading } = useDashboardData()
+  const { stats, recentActivities, loading, connectionError } = useDashboardData()
 
   // Shop status distribution data from database
   const getShopStatusData = () => {
@@ -37,6 +39,55 @@ export default function FalconDashboard() {
       { name: "Available", value: Math.round((availableShops / stats.totalShops) * 100), color: "#3b82f6" },
       { name: "Rented", value: stats.occupancyRate, color: "#10b981" },
     ]
+  }
+
+  // Show connection error if exists
+  if (connectionError) {
+    return (
+      <div className={cn("falcon-dashboard", locale === "ar" && "rtl")}>
+        <FalconSidebar locale={locale} onLocaleChange={setLocale} />
+
+        <div className={cn("lg:pl-72 flex flex-col flex-1", locale === "ar" && "lg:pl-0 lg:pr-72")}>
+          <FalconHeader
+            title={locale === "ar" ? "خطأ في الاتصال" : "Connection Error"}
+            subtitle={locale === "ar" ? "فشل في الاتصال بقاعدة البيانات" : "Failed to connect to database"}
+            locale={locale}
+          />
+
+          <main className="falcon-main p-6">
+            <Card className="falcon-card max-w-2xl mx-auto">
+              <CardHeader className="falcon-card-header">
+                <div className="flex items-center space-x-3">
+                  <AlertTriangle className="h-8 w-8 text-red-600" />
+                  <div>
+                    <CardTitle className="falcon-card-title text-red-900">
+                      {locale === "ar" ? "خطأ في قاعدة البيانات" : "Database Connection Error"}
+                    </CardTitle>
+                    <CardDescription className="falcon-card-description">
+                      {locale === "ar" ? "تعذر الاتصال بقاعدة البيانات" : "Unable to connect to the database"}
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="falcon-card-content">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                  <p className="text-sm text-red-800 font-mono">{connectionError}</p>
+                </div>
+                <div className="space-y-2 text-sm text-slate-600">
+                  <p><strong>Possible solutions:</strong></p>
+                  <ul className="list-disc list-inside space-y-1 ml-4">
+                    <li>Check if Supabase environment variables are correctly set</li>
+                    <li>Verify database tables exist and are accessible</li>
+                    <li>Ensure Supabase project is active and not paused</li>
+                    <li>Check network connectivity</li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+          </main>
+        </div>
+      </div>
+    )
   }
 
   return (
