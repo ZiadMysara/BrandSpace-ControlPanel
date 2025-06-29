@@ -182,7 +182,7 @@ export default function AnalyticsPage() {
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="falcon-card-content">
-                      <div className="h-80 w-full">
+                      <div className="h-80 w-full min-h-[320px]">
                         <ResponsiveContainer width="100%" height="100%">
                           <AreaChart data={performanceData}>
                             <defs>
@@ -238,7 +238,7 @@ export default function AnalyticsPage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="falcon-card-content">
-                    <div className="h-64">
+                    <div className="h-64 w-full min-h-[256px]">
                       <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
                           <Pie
