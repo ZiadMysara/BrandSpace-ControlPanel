@@ -24,22 +24,22 @@ export function FalconHeader({ title, subtitle, locale }: FalconHeaderProps) {
   const [searchQuery, setSearchQuery] = useState("")
 
   return (
-    <header className="falcon-header flex items-center justify-between">
+    <header className="flex items-center justify-between p-6 bg-white border-b border-slate-200">
       <div>
-        <h1 className="falcon-page-title">{title}</h1>
-        {subtitle && <p className="falcon-page-subtitle">{subtitle}</p>}
+        <h1 className="text-2xl font-bold brandspace-text-primary">{title}</h1>
+        {subtitle && <p className="text-sm text-slate-600 mt-1">{subtitle}</p>}
       </div>
 
       <div className="flex items-center space-x-4">
-        {/* Search - Falcon style */}
+        {/* Search - Brand Space style */}
         <div className="hidden md:block">
-          <div className="falcon-search">
-            <Search className="falcon-search-icon" />
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
             <Input
               placeholder={locale === "ar" ? "البحث..." : "Search..."}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="falcon-search-input w-80 text-slate-900 placeholder:text-slate-500"
+              className="w-80 pl-10 border-slate-200 focus:border-[#1a365d] focus:ring-[#1a365d]"
             />
           </div>
         </div>
@@ -49,19 +49,19 @@ export function FalconHeader({ title, subtitle, locale }: FalconHeaderProps) {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="relative hover:bg-slate-100">
               <Bell className="h-5 w-5 text-slate-600" />
-              <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 h-4 w-4 bg-[#e53e3e] text-white text-xs rounded-full flex items-center justify-center">
                 3
               </span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-80 falcon-dropdown">
+          <DropdownMenuContent align="end" className="w-80">
             <DropdownMenuLabel className="font-semibold">
               {locale === "ar" ? "الإشعارات" : "Notifications"}
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="p-4">
               <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                <div className="w-2 h-2 bg-[#1a365d] rounded-full mt-2"></div>
                 <div>
                   <p className="text-sm font-medium">New inquiry received</p>
                   <p className="text-xs text-slate-500">2 minutes ago</p>
@@ -79,7 +79,7 @@ export function FalconHeader({ title, subtitle, locale }: FalconHeaderProps) {
             </DropdownMenuItem>
             <DropdownMenuItem className="p-4">
               <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-orange-500 rounded-full mt-2"></div>
+                <div className="w-2 h-2 bg-[#e53e3e] rounded-full mt-2"></div>
                 <div>
                   <p className="text-sm font-medium">New booking request</p>
                   <p className="text-xs text-slate-500">3 hours ago</p>
@@ -96,50 +96,50 @@ export function FalconHeader({ title, subtitle, locale }: FalconHeaderProps) {
               <Settings className="h-5 w-5 text-slate-600" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="falcon-dropdown">
-            <DropdownMenuItem className="falcon-dropdown-item">
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem>
               <Mail className="mr-2 h-4 w-4" />
               {locale === "ar" ? "الرسائل" : "Messages"}
             </DropdownMenuItem>
-            <DropdownMenuItem className="falcon-dropdown-item">
+            <DropdownMenuItem>
               <Calendar className="mr-2 h-4 w-4" />
               {locale === "ar" ? "التقويم" : "Calendar"}
             </DropdownMenuItem>
-            <DropdownMenuItem className="falcon-dropdown-item">
+            <DropdownMenuItem>
               <HelpCircle className="mr-2 h-4 w-4" />
               {locale === "ar" ? "المساعدة" : "Help"}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* User Menu - Exact Falcon style */}
+        {/* User Menu - Brand Space style */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="flex items-center space-x-2 px-3 hover:bg-slate-100">
-              <Avatar className="h-8 w-8 falcon-avatar">
-                <AvatarImage src="/placeholder-avatar.jpg" alt="User" />
-                <AvatarFallback className="bg-blue-100 text-blue-700 text-sm font-medium">AD</AvatarFallback>
+              <Avatar className="h-8 w-8">
+                <AvatarImage src="/placeholder-user.jpg" alt="User" />
+                <AvatarFallback className="bg-[#1a365d] text-white text-sm font-medium">AD</AvatarFallback>
               </Avatar>
               <div className="hidden md:block text-left">
-                <p className="text-sm font-medium text-slate-900">Admin User</p>
+                <p className="text-sm font-medium brandspace-text-primary">Admin User</p>
                 <p className="text-xs text-slate-500">admin@brandspace.com</p>
               </div>
               <ChevronDown className="h-4 w-4 text-slate-500" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56 falcon-dropdown">
+          <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>{locale === "ar" ? "حسابي" : "My Account"}</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="falcon-dropdown-item">
+            <DropdownMenuItem>
               <User className="mr-2 h-4 w-4" />
               {locale === "ar" ? "الملف الشخصي" : "Profile"}
             </DropdownMenuItem>
-            <DropdownMenuItem className="falcon-dropdown-item">
+            <DropdownMenuItem>
               <Settings className="mr-2 h-4 w-4" />
               {locale === "ar" ? "الإعدادات" : "Settings"}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="falcon-dropdown-item text-red-600">
+            <DropdownMenuItem className="text-[#e53e3e]">
               {locale === "ar" ? "تسجيل الخروج" : "Sign out"}
             </DropdownMenuItem>
           </DropdownMenuContent>

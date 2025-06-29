@@ -23,6 +23,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { useTheme } from "next-themes"
 import Link from "next/link"
+import Image from "next/image"
 
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: Home },
@@ -124,13 +125,18 @@ function SidebarContent({
   const navItems = locale === "ar" ? navigationAr : navigation
 
   return (
-    <div className="flex flex-col flex-grow bg-card border-r">
-      {/* Logo section with blur effect */}
-      <div className="flex items-center justify-between p-6 bg-gradient-to-r from-primary to-blue-600">
+    <div className="flex flex-col flex-grow bg-card border-r border-border">
+      {/* Logo section with Brand Space styling */}
+      <div className="flex items-center justify-between p-6 brandspace-gradient">
         <div className="flex items-center justify-center w-full">
-          <div className="backdrop-blur-sm bg-white/20 rounded-lg border border-white/30 shadow-lg p-3">
-            <div className="text-white font-bold text-lg"><img src="/brandspace-logo.svg" alt="Brandspace Logo" />
-</div>
+          <div className="backdrop-blur-sm bg-white/10 rounded-lg border border-white/20 shadow-lg p-3">
+            <Image
+              src="/brandspace-logo.jpeg"
+              alt="Brand Space Logo"
+              width={120}
+              height={40}
+              className="object-contain"
+            />
           </div>
         </div>
         {onClose && (
@@ -157,8 +163,8 @@ function SidebarContent({
               className={cn(
                 "flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors duration-200",
                 isActive
-                  ? "bg-primary text-primary-foreground shadow-md"
-                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                  ? "bg-[#1a365d] text-white shadow-md"
+                  : "text-muted-foreground hover:bg-accent/10 hover:text-[#1a365d]",
                 locale === "ar" && "flex-row-reverse",
               )}
             >
@@ -176,7 +182,7 @@ function SidebarContent({
           variant="ghost"
           size="sm"
           onClick={() => onLocaleChange(locale === "en" ? "ar" : "en")}
-          className={cn("w-full justify-start", locale === "ar" && "flex-row-reverse")}
+          className={cn("w-full justify-start hover:bg-accent/10", locale === "ar" && "flex-row-reverse")}
         >
           <Globe className={cn("h-4 w-4", locale === "ar" ? "ml-2" : "mr-2")} />
           {locale === "en" ? "العربية" : "English"}
@@ -187,7 +193,7 @@ function SidebarContent({
           variant="ghost"
           size="sm"
           onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-          className={cn("w-full justify-start", locale === "ar" && "flex-row-reverse")}
+          className={cn("w-full justify-start hover:bg-accent/10", locale === "ar" && "flex-row-reverse")}
         >
           {theme === "light" ? (
             <Moon className={cn("h-4 w-4", locale === "ar" ? "ml-2" : "mr-2")} />

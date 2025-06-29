@@ -1,498 +1,326 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { FalconSidebar } from "@/components/falcon-sidebar"
+import { useState } from "react"
+import { AdminSidebar } from "@/components/admin-sidebar"
 import { FalconHeader } from "@/components/falcon-header"
-import { FalconMetricCard } from "@/components/falcon-metric-card"
-import { cn } from "@/lib/utils"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Users, Building2, ShoppingBag, DollarSign, ArrowUpRight, ArrowDownRight } from "lucide-react"
 import {
-  Building2,
-  ShoppingBag,
-  DollarSign,
-  TrendingUp,
-  Users,
-  MessageSquare,
-  Eye,
-  Clock,
-  ArrowUpRight,
-  MoreHorizontal,
-} from "lucide-react"
-import {
-  ResponsiveContainer,
   AreaChart,
   Area,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
   PieChart,
   Pie,
   Cell,
 } from "recharts"
-import { supabase } from "@/lib/supabase"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Progress } from "@/components/ui/progress"
-import { ChartDebug } from "@/components/chart-debug"
 
-// Sample data for charts - Falcon colors
-const monthlyData = [
-  { month: "Jan", inquiries: 45, bookings: 12, revenue: 125000, visitors: 2400 },
-  { month: "Feb", inquiries: 52, bookings: 18, revenue: 180000, visitors: 2800 },
-  { month: "Mar", inquiries: 48, bookings: 15, revenue: 165000, visitors: 2600 },
-  { month: "Apr", inquiries: 61, bookings: 22, revenue: 220000, visitors: 3200 },
-  { month: "May", inquiries: 55, bookings: 19, revenue: 195000, visitors: 2900 },
-  { month: "Jun", inquiries: 67, bookings: 25, revenue: 275000, visitors: 3400 },
+// Sample data for charts
+const revenueData = [
+  { month: "Jan", revenue: 45000, users: 1200 },
+  { month: "Feb", revenue: 52000, users: 1350 },
+  { month: "Mar", revenue: 48000, users: 1280 },
+  { month: "Apr", revenue: 61000, users: 1420 },
+  { month: "May", revenue: 55000, users: 1380 },
+  { month: "Jun", revenue: 67000, users: 1520 },
 ]
 
-const pieData = [
-  { name: "Available", value: 45, color: "#3b82f6" },
-  { name: "Rented", value: 30, color: "#10b981" },
-  { name: "Reserved", value: 15, color: "#f97316" }, // Orange instead of yellow
-  { name: "Maintenance", value: 10, color: "#ef4444" },
+const bookingsData = [
+  { day: "Mon", bookings: 45 },
+  { day: "Tue", bookings: 52 },
+  { day: "Wed", bookings: 38 },
+  { day: "Thu", bookings: 61 },
+  { day: "Fri", bookings: 55 },
+  { day: "Sat", bookings: 67 },
+  { day: "Sun", bookings: 43 },
 ]
 
-const recentActivities = [
-  {
-    id: 1,
-    user: "Ahmed Al-Rashid",
-    action: "Created new inquiry",
-    target: "Mall Plaza Shop #205",
-    time: "2 minutes ago",
-    avatar: "AR",
-    type: "inquiry",
-  },
-  {
-    id: 2,
-    user: "Sarah Johnson",
-    action: "Completed payment",
-    target: "$25,000 monthly rent",
-    time: "15 minutes ago",
-    avatar: "SJ",
-    type: "payment",
-  },
-  {
-    id: 3,
-    user: "Mohammed Al-Fahad",
-    action: "Updated shop status",
-    target: "Shop #101 to Available",
-    time: "1 hour ago",
-    avatar: "MF",
-    type: "update",
-  },
-  {
-    id: 4,
-    user: "Fatima Al-Zahra",
-    action: "Scheduled viewing",
-    target: "Riyadh Grand Mall",
-    time: "2 hours ago",
-    avatar: "FZ",
-    type: "booking",
-  },
+const categoryData = [
+  { name: "Retail", value: 35, color: "#1a365d" },
+  { name: "Food & Beverage", value: 25, color: "#2c5282" },
+  { name: "Entertainment", value: 20, color: "#e53e3e" },
+  { name: "Services", value: 20, color: "#718096" },
 ]
 
-const topShops = [
-  { name: "Nike Sports Store", mall: "Riyadh Grand Mall", revenue: "$45,000", growth: "+12%", status: "rented" },
-  { name: "Apple Store", mall: "Jeddah Commercial Center", revenue: "$38,500", growth: "+8%", status: "rented" },
-  { name: "Zara Fashion", mall: "Dammam New Mall", revenue: "$32,000", growth: "+15%", status: "rented" },
-  { name: "Starbucks Cafe", mall: "Riyadh Grand Mall", revenue: "$28,000", growth: "+5%", status: "rented" },
-]
-
-interface DashboardStats {
-  totalMalls: number
-  totalShops: number
-  totalBookings: number
-  totalRevenue: number
-  recentInquiries: number
-  activeUsers: number
-  occupancyRate: number
-  monthlyGrowth: number
-}
-
-export default function FalconDashboard() {
+export default function AdminDashboard() {
   const [locale, setLocale] = useState<"en" | "ar">("en")
-  const [stats, setStats] = useState<DashboardStats>({
-    totalMalls: 0,
-    totalShops: 0,
-    totalBookings: 0,
-    totalRevenue: 0,
-    recentInquiries: 0,
-    activeUsers: 0,
-    occupancyRate: 0,
-    monthlyGrowth: 0,
-  })
-  const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    fetchDashboardStats()
-  }, [])
+  const metrics = [
+    {
+      title: locale === "ar" ? "إجمالي المستخدمين" : "Total Users",
+      value: "12,543",
+      change: "+12.5%",
+      trend: "up",
+      icon: Users,
+      color: "text-[#1a365d]",
+      bgColor: "bg-[#1a365d]/10",
+    },
+    {
+      title: locale === "ar" ? "المولات النشطة" : "Active Malls",
+      value: "89",
+      change: "+3.2%",
+      trend: "up",
+      icon: Building2,
+      color: "text-[#2c5282]",
+      bgColor: "bg-[#2c5282]/10",
+    },
+    {
+      title: locale === "ar" ? "المحلات المؤجرة" : "Rented Shops",
+      value: "1,247",
+      change: "+8.1%",
+      trend: "up",
+      icon: ShoppingBag,
+      color: "text-green-600",
+      bgColor: "bg-green-100",
+    },
+    {
+      title: locale === "ar" ? "الإيرادات الشهرية" : "Monthly Revenue",
+      value: "$67,000",
+      change: "+15.3%",
+      trend: "up",
+      icon: DollarSign,
+      color: "text-[#e53e3e]",
+      bgColor: "bg-[#e53e3e]/10",
+    },
+  ]
 
-  const fetchDashboardStats = async () => {
-    try {
-      setLoading(true)
-
-      // Fetch stats from Supabase
-      const [mallsResult, shopsResult, bookingsResult, inquiriesResult, usersResult] = await Promise.all([
-        supabase.from("malls").select("id", { count: "exact" }),
-        supabase.from("shops").select("id, status", { count: "exact" }),
-        supabase.from("bookings").select("id, total_amount", { count: "exact" }),
-        supabase
-          .from("inquiries")
-          .select("id")
-          .gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
-        supabase.from("users").select("id").eq("is_active", true),
-      ])
-
-      const totalRevenue = bookingsResult.data?.reduce((sum, booking) => sum + (booking.total_amount || 0), 0) || 0
-      const rentedShops = shopsResult.data?.filter((shop) => shop.status === "rented").length || 0
-      const occupancyRate = shopsResult.count ? Math.round((rentedShops / shopsResult.count) * 100) : 0
-
-      setStats({
-        totalMalls: mallsResult.count || 0,
-        totalShops: shopsResult.count || 0,
-        totalBookings: bookingsResult.count || 0,
-        totalRevenue,
-        recentInquiries: inquiriesResult.data?.length || 0,
-        activeUsers: usersResult.data?.length || 0,
-        occupancyRate,
-        monthlyGrowth: 12.5, // This would be calculated based on historical data
-      })
-    } catch (error) {
-      console.error("Error fetching dashboard stats:", error)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const recentActivities = [
+    {
+      id: 1,
+      type: "booking",
+      message: locale === "ar" ? "حجز جديد في مول الرياض" : "New booking at Riyadh Mall",
+      time: "2 minutes ago",
+      status: "success",
+    },
+    {
+      id: 2,
+      type: "payment",
+      message: locale === "ar" ? "دفعة مستلمة من محل الأزياء" : "Payment received from Fashion Store",
+      time: "15 minutes ago",
+      status: "success",
+    },
+    {
+      id: 3,
+      type: "inquiry",
+      message: locale === "ar" ? "استفسار جديد عن مساحة تجارية" : "New inquiry about retail space",
+      time: "1 hour ago",
+      status: "pending",
+    },
+    {
+      id: 4,
+      type: "user",
+      message: locale === "ar" ? "مستخدم جديد مسجل" : "New user registered",
+      time: "2 hours ago",
+      status: "info",
+    },
+  ]
 
   return (
-    <div className={cn("falcon-dashboard", locale === "ar" && "rtl")}>
-      <FalconSidebar locale={locale} onLocaleChange={setLocale} />
+    <div className="min-h-screen bg-slate-50">
+      <AdminSidebar locale={locale} onLocaleChange={setLocale} />
 
-      <div className={cn("lg:pl-72 flex flex-col flex-1", locale === "ar" && "lg:pl-0 lg:pr-72")}>
+      <div className={`${locale === "ar" ? "lg:mr-64" : "lg:ml-64"} transition-all duration-300`}>
         <FalconHeader
-          title={locale === "ar" ? "مرحباً، أهلاً بك!" : "Good Afternoon, Admin!"}
-          subtitle={
-            locale === "ar" ? "إليك ما يحدث في BrandSpace اليوم" : "Here's what's happening with BrandSpace today"
-          }
+          title={locale === "ar" ? "لوحة التحكم" : "Dashboard"}
+          subtitle={locale === "ar" ? "نظرة عامة على أداء النظام" : "Overview of system performance"}
           locale={locale}
         />
 
-        {/* Main content */}
-        <main className="falcon-main p-6">
-          {/* Temporary debug component */}
-          <ChartDebug />
-
-          {/* Top Metrics - Exact Falcon style */}
-          <div className="falcon-grid falcon-grid-4 mb-8">
-            <FalconMetricCard
-              title={locale === "ar" ? "إجمالي المولات" : "Total Malls"}
-              value={loading ? "..." : stats.totalMalls}
-              change={{ value: "+2.5%", type: "positive" }}
-              icon={Building2}
-              iconColor="text-blue-600"
-            />
-            <FalconMetricCard
-              title={locale === "ar" ? "إجمالي المحلات" : "Total Shops"}
-              value={loading ? "..." : stats.totalShops}
-              change={{ value: "+8.2%", type: "positive" }}
-              icon={ShoppingBag}
-              iconColor="text-emerald-600"
-            />
-            <FalconMetricCard
-              title={locale === "ar" ? "معدل الإشغال" : "Occupancy Rate"}
-              value={loading ? "..." : `${stats.occupancyRate}%`}
-              change={{ value: "+5.1%", type: "positive" }}
-              icon={TrendingUp}
-              iconColor="text-purple-600"
-            />
-            <FalconMetricCard
-              title={locale === "ar" ? "الإيرادات الشهرية" : "Monthly Revenue"}
-              value={loading ? "..." : `$${stats.totalRevenue.toLocaleString()}`}
-              change={{ value: `+${stats.monthlyGrowth}%`, type: "positive" }}
-              icon={DollarSign}
-              iconColor="text-orange-600"
-            />
-          </div>
-
-          {/* Charts Row - Falcon style */}
-          <div className="falcon-grid falcon-grid-3 mb-8">
-            {/* Revenue Chart */}
-            <div className="lg:col-span-2">
-              <Card className="falcon-card h-full">
-                <CardHeader className="falcon-card-header">
+        <main className="p-6">
+          {/* Metrics Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {metrics.map((metric, index) => (
+              <Card key={index} className="brandspace-card">
+                <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <CardTitle className="falcon-card-title">
-                        {locale === "ar" ? "الإيرادات والحجوزات" : "Revenue & Bookings"}
-                      </CardTitle>
-                      <CardDescription className="falcon-card-description">
-                        {locale === "ar" ? "الأداء خلال الأشهر الستة الماضية" : "Performance over the last 6 months"}
-                      </CardDescription>
+                      <p className="text-sm font-medium text-slate-600">{metric.title}</p>
+                      <p className="text-2xl font-bold brandspace-text-primary mt-2">{metric.value}</p>
+                      <div className="flex items-center mt-2">
+                        {metric.trend === "up" ? (
+                          <ArrowUpRight className="h-4 w-4 text-green-500 mr-1" />
+                        ) : (
+                          <ArrowDownRight className="h-4 w-4 text-red-500 mr-1" />
+                        )}
+                        <span
+                          className={`text-sm font-medium ${metric.trend === "up" ? "text-green-600" : "text-red-600"}`}
+                        >
+                          {metric.change}
+                        </span>
+                      </div>
                     </div>
-                    <Button variant="ghost" size="sm" className="hover:bg-slate-100">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent className="falcon-card-content p-0">
-                  <div className="h-80 w-full p-4">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={monthlyData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                        <defs>
-                          <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                            <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                          </linearGradient>
-                          <linearGradient id="colorBookings" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                            <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                        <XAxis dataKey="month" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
-                        <YAxis
-                          stroke="#64748b"
-                          fontSize={12}
-                          tickLine={false}
-                          axisLine={false}
-                          tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
-                        />
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: "white",
-                            border: "1px solid #e2e8f0",
-                            borderRadius: "12px",
-                            boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
-                          }}
-                          formatter={(value, name) => [
-                            name === "revenue" ? `$${Number(value).toLocaleString()}` : value,
-                            name === "revenue"
-                              ? locale === "ar"
-                                ? "الإيرادات"
-                                : "Revenue"
-                              : locale === "ar"
-                                ? "الحجوزات"
-                                : "Bookings",
-                          ]}
-                        />
-                        <Area
-                          type="monotone"
-                          dataKey="revenue"
-                          stroke="#3b82f6"
-                          strokeWidth={2}
-                          fillOpacity={1}
-                          fill="url(#colorRevenue)"
-                          name="revenue"
-                        />
-                        <Area
-                          type="monotone"
-                          dataKey="bookings"
-                          stroke="#10b981"
-                          strokeWidth={2}
-                          fillOpacity={1}
-                          fill="url(#colorBookings)"
-                          name="bookings"
-                        />
-                      </AreaChart>
-                    </ResponsiveContainer>
+                    <div className={`p-3 rounded-lg ${metric.bgColor}`}>
+                      <metric.icon className={`h-6 w-6 ${metric.color}`} />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
-            </div>
+            ))}
+          </div>
 
-            {/* Shop Status Distribution */}
-            <Card className="falcon-card">
-              <CardHeader className="falcon-card-header">
-                <CardTitle className="falcon-card-title">{locale === "ar" ? "حالة المحلات" : "Shop Status"}</CardTitle>
-                <CardDescription className="falcon-card-description">
-                  {locale === "ar" ? "توزيع المحلات حسب الحالة" : "Distribution by status"}
+          {/* Charts Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            {/* Revenue Chart */}
+            <Card className="brandspace-card">
+              <CardHeader>
+                <CardTitle className="brandspace-text-primary">
+                  {locale === "ar" ? "الإيرادات الشهرية" : "Monthly Revenue"}
+                </CardTitle>
+                <CardDescription>
+                  {locale === "ar"
+                    ? "نمو الإيرادات خلال الأشهر الستة الماضية"
+                    : "Revenue growth over the last 6 months"}
                 </CardDescription>
               </CardHeader>
-              <CardContent className="falcon-card-content">
+              <CardContent>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={revenueData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                      <XAxis dataKey="month" stroke="#64748b" />
+                      <YAxis stroke="#64748b" />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: "white",
+                          border: "1px solid #e2e8f0",
+                          borderRadius: "8px",
+                        }}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="revenue"
+                        stroke="#1a365d"
+                        fill="#1a365d"
+                        fillOpacity={0.1}
+                        strokeWidth={2}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Bookings Chart */}
+            <Card className="brandspace-card">
+              <CardHeader>
+                <CardTitle className="brandspace-text-primary">
+                  {locale === "ar" ? "الحجوزات الأسبوعية" : "Weekly Bookings"}
+                </CardTitle>
+                <CardDescription>
+                  {locale === "ar" ? "عدد الحجوزات خلال الأسبوع الحالي" : "Number of bookings this week"}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={bookingsData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                      <XAxis dataKey="day" stroke="#64748b" />
+                      <YAxis stroke="#64748b" />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: "white",
+                          border: "1px solid #e2e8f0",
+                          borderRadius: "8px",
+                        }}
+                      />
+                      <Bar dataKey="bookings" fill="#1a365d" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Bottom Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Category Distribution */}
+            <Card className="brandspace-card">
+              <CardHeader>
+                <CardTitle className="brandspace-text-primary">
+                  {locale === "ar" ? "توزيع الفئات" : "Category Distribution"}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
-                        data={pieData}
+                        data={categoryData}
                         cx="50%"
                         cy="50%"
                         innerRadius={60}
                         outerRadius={100}
-                        paddingAngle={2}
+                        paddingAngle={5}
                         dataKey="value"
                       >
-                        {pieData.map((entry, index) => (
+                        {categoryData.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
                       </Pie>
-                      <Tooltip formatter={(value) => [`${value}%`, "Percentage"]} />
+                      <Tooltip />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
                 <div className="mt-4 space-y-2">
-                  {pieData.map((item, index) => (
+                  {categoryData.map((item, index) => (
                     <div key={index} className="flex items-center justify-between">
                       <div className="flex items-center">
                         <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: item.color }} />
                         <span className="text-sm text-slate-600">{item.name}</span>
                       </div>
-                      <span className="text-sm font-medium text-slate-900">{item.value}%</span>
+                      <span className="text-sm font-medium">{item.value}%</span>
                     </div>
                   ))}
                 </div>
               </CardContent>
             </Card>
-          </div>
 
-          {/* Bottom Row - Falcon style */}
-          <div className="falcon-grid falcon-grid-2 mb-8">
-            {/* Recent Activity */}
-            <Card className="falcon-card">
-              <CardHeader className="falcon-card-header">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="falcon-card-title">
-                    {locale === "ar" ? "النشاط الأخير" : "Recent Activity"}
-                  </CardTitle>
-                  <Button variant="ghost" size="sm" className="text-blue-600 hover:bg-blue-50">
-                    {locale === "ar" ? "عرض الكل" : "View All"}
-                  </Button>
-                </div>
+            {/* Recent Activities */}
+            <Card className="brandspace-card lg:col-span-2">
+              <CardHeader>
+                <CardTitle className="brandspace-text-primary">
+                  {locale === "ar" ? "الأنشطة الحديثة" : "Recent Activities"}
+                </CardTitle>
               </CardHeader>
-              <CardContent className="falcon-card-content">
+              <CardContent>
                 <div className="space-y-4">
                   {recentActivities.map((activity) => (
-                    <div key={activity.id} className="flex items-start space-x-3">
-                      <Avatar className="h-8 w-8 falcon-avatar">
-                        <AvatarFallback className="bg-blue-100 text-blue-700 text-xs">{activity.avatar}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-slate-900">
-                          <span className="font-medium">{activity.user}</span>{" "}
-                          <span className="text-slate-600">{activity.action}</span>
-                        </p>
-                        <p className="text-sm text-slate-600">{activity.target}</p>
-                        <p className="text-xs text-slate-500 mt-1">{activity.time}</p>
-                      </div>
-                      <div
-                        className={cn(
-                          "w-2 h-2 rounded-full mt-2",
-                          activity.type === "inquiry" && "bg-blue-500",
-                          activity.type === "payment" && "bg-green-500",
-                          activity.type === "update" && "bg-orange-500",
-                          activity.type === "booking" && "bg-purple-500",
-                        )}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Top Performing Shops */}
-            <Card className="falcon-card">
-              <CardHeader className="falcon-card-header">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="falcon-card-title">
-                    {locale === "ar" ? "أفضل المحلات أداءً" : "Top Performing Shops"}
-                  </CardTitle>
-                  <Button variant="ghost" size="sm" className="text-blue-600 hover:bg-blue-50">
-                    {locale === "ar" ? "عرض التفاصيل" : "View Details"}
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="falcon-card-content">
-                <div className="space-y-4">
-                  {topShops.map((shop, index) => (
-                    <div key={index} className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-slate-900">{shop.name}</p>
-                        <p className="text-xs text-slate-500">{shop.mall}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm font-medium text-slate-900">{shop.revenue}</p>
-                        <div className="flex items-center">
-                          <ArrowUpRight className="h-3 w-3 text-green-600 mr-1" />
-                          <span className="text-xs text-green-600">{shop.growth}</span>
+                    <div key={activity.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                      <div className="flex items-center">
+                        <div
+                          className={`w-2 h-2 rounded-full mr-3 ${
+                            activity.status === "success"
+                              ? "bg-green-500"
+                              : activity.status === "pending"
+                                ? "bg-yellow-500"
+                                : "bg-[#1a365d]"
+                          }`}
+                        />
+                        <div>
+                          <p className="text-sm font-medium text-slate-900">{activity.message}</p>
+                          <p className="text-xs text-slate-500">{activity.time}</p>
                         </div>
                       </div>
+                      <Badge
+                        variant={
+                          activity.status === "success"
+                            ? "default"
+                            : activity.status === "pending"
+                              ? "secondary"
+                              : "outline"
+                        }
+                      >
+                        {activity.status}
+                      </Badge>
                     </div>
                   ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Quick Stats Row - Falcon style */}
-          <div className="falcon-grid falcon-grid-4">
-            <Card className="falcon-card">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-600">
-                      {locale === "ar" ? "الاستفسارات الجديدة" : "New Inquiries"}
-                    </p>
-                    <p className="text-2xl font-bold text-slate-900">{stats.recentInquiries}</p>
-                  </div>
-                  <MessageSquare className="h-8 w-8 text-blue-600" />
-                </div>
-                <div className="mt-4">
-                  <Progress value={75} className="falcon-progress h-2" />
-                  <p className="text-xs text-slate-500 mt-2">75% of monthly target</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="falcon-card">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-600">
-                      {locale === "ar" ? "المستخدمين النشطين" : "Active Users"}
-                    </p>
-                    <p className="text-2xl font-bold text-slate-900">{stats.activeUsers}</p>
-                  </div>
-                  <Users className="h-8 w-8 text-green-600" />
-                </div>
-                <div className="mt-4">
-                  <Progress value={85} className="falcon-progress h-2" />
-                  <p className="text-xs text-slate-500 mt-2">85% engagement rate</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="falcon-card">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-600">
-                      {locale === "ar" ? "المعاينات المجدولة" : "Scheduled Viewings"}
-                    </p>
-                    <p className="text-2xl font-bold text-slate-900">24</p>
-                  </div>
-                  <Eye className="h-8 w-8 text-purple-600" />
-                </div>
-                <div className="mt-4">
-                  <Progress value={60} className="falcon-progress h-2" />
-                  <p className="text-xs text-slate-500 mt-2">60% conversion rate</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="falcon-card">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-600">
-                      {locale === "ar" ? "متوسط وقت الاستجابة" : "Avg Response Time"}
-                    </p>
-                    <p className="text-2xl font-bold text-slate-900">2.4h</p>
-                  </div>
-                  <Clock className="h-8 w-8 text-orange-600" />
-                </div>
-                <div className="mt-4">
-                  <Progress value={90} className="falcon-progress h-2" />
-                  <p className="text-xs text-slate-500 mt-2">90% within SLA</p>
                 </div>
               </CardContent>
             </Card>

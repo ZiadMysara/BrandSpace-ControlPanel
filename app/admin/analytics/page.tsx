@@ -1,281 +1,259 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { FalconSidebar } from "@/components/falcon-sidebar"
+import { useState } from "react"
+import { AdminSidebar } from "@/components/admin-sidebar"
 import { FalconHeader } from "@/components/falcon-header"
-import { FalconMetricCard } from "@/components/falcon-metric-card"
-import { cn } from "@/lib/utils"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { TrendingUp, Users, DollarSign, Activity, Download } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Calendar, Download, TrendingUp, Users, Building2, DollarSign } from "lucide-react"
 import {
-  ResponsiveContainer,
-  AreaChart,
+  LineChart,
+  Line,
   Area,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
-  BarChart,
-  Bar,
-  LineChart,
-  Line,
+  ResponsiveContainer,
   PieChart,
   Pie,
   Cell,
+  ComposedChart,
 } from "recharts"
 
 // Sample analytics data
-const performanceData = [
-  { month: "Jan", users: 1200, sessions: 3400, pageViews: 8900, bounceRate: 32 },
-  { month: "Feb", users: 1400, sessions: 3800, pageViews: 9500, bounceRate: 28 },
-  { month: "Mar", users: 1100, sessions: 3200, pageViews: 8200, bounceRate: 35 },
-  { month: "Apr", users: 1600, sessions: 4200, pageViews: 11000, bounceRate: 25 },
-  { month: "May", users: 1800, sessions: 4800, pageViews: 12500, bounceRate: 22 },
-  { month: "Jun", users: 2000, sessions: 5200, pageViews: 13800, bounceRate: 20 },
+const userGrowthData = [
+  { month: "Jan", users: 1200, newUsers: 150, activeUsers: 980 },
+  { month: "Feb", users: 1350, newUsers: 180, activeUsers: 1100 },
+  { month: "Mar", users: 1280, newUsers: 120, activeUsers: 1050 },
+  { month: "Apr", users: 1420, newUsers: 200, activeUsers: 1200 },
+  { month: "May", users: 1380, newUsers: 160, activeUsers: 1150 },
+  { month: "Jun", users: 1520, newUsers: 220, activeUsers: 1300 },
+  { month: "Jul", users: 1680, newUsers: 240, activeUsers: 1420 },
+  { month: "Aug", users: 1750, newUsers: 190, activeUsers: 1480 },
 ]
 
-const revenueData = [
-  { month: "Jan", revenue: 125000, profit: 45000, expenses: 80000 },
-  { month: "Feb", revenue: 180000, profit: 72000, expenses: 108000 },
-  { month: "Mar", revenue: 165000, profit: 58000, expenses: 107000 },
-  { month: "Apr", revenue: 220000, profit: 95000, expenses: 125000 },
-  { month: "May", revenue: 195000, profit: 78000, expenses: 117000 },
-  { month: "Jun", revenue: 275000, profit: 125000, expenses: 150000 },
+const revenueAnalytics = [
+  { month: "Jan", revenue: 45000, profit: 12000, expenses: 33000 },
+  { month: "Feb", revenue: 52000, profit: 15000, expenses: 37000 },
+  { month: "Mar", revenue: 48000, profit: 13000, expenses: 35000 },
+  { month: "Apr", revenue: 61000, profit: 18000, expenses: 43000 },
+  { month: "May", revenue: 55000, profit: 16000, expenses: 39000 },
+  { month: "Jun", revenue: 67000, profit: 21000, expenses: 46000 },
+  { month: "Jul", revenue: 72000, profit: 24000, expenses: 48000 },
+  { month: "Aug", revenue: 68000, profit: 22000, expenses: 46000 },
 ]
 
-const trafficSources = [
-  { name: "Direct", value: 35, color: "#3b82f6" },
-  { name: "Search", value: 28, color: "#10b981" },
-  { name: "Social", value: 20, color: "#f97316" },
-  { name: "Referral", value: 12, color: "#8b5cf6" },
-  { name: "Email", value: 5, color: "#ef4444" },
+const mallPerformance = [
+  { name: "Riyadh Mall", occupancy: 95, revenue: 25000, shops: 120 },
+  { name: "Jeddah Center", occupancy: 88, revenue: 22000, shops: 98 },
+  { name: "Dammam Plaza", occupancy: 92, revenue: 18000, shops: 85 },
+  { name: "Mecca Square", occupancy: 85, revenue: 15000, shops: 75 },
+  { name: "Medina Hub", occupancy: 90, revenue: 12000, shops: 60 },
+]
+
+const categoryBreakdown = [
+  { name: "Retail", value: 35, revenue: 24500, color: "#1a365d" },
+  { name: "Food & Beverage", value: 25, revenue: 17500, color: "#2c5282" },
+  { name: "Entertainment", value: 20, revenue: 14000, color: "#e53e3e" },
+  { name: "Services", value: 15, revenue: 10500, color: "#718096" },
+  { name: "Others", value: 5, revenue: 3500, color: "#a0aec0" },
 ]
 
 export default function AnalyticsPage() {
   const [locale, setLocale] = useState<"en" | "ar">("en")
-  const [loading, setLoading] = useState(true)
-  const [timeRange, setTimeRange] = useState("30d")
-  const [stats, setStats] = useState({
-    totalUsers: 0,
-    totalSessions: 0,
-    avgSessionDuration: "0m",
-    bounceRate: 0,
-    conversionRate: 0,
-    revenue: 0,
-  })
+  const [timeRange, setTimeRange] = useState("6months")
 
-  useEffect(() => {
-    fetchAnalyticsData()
-  }, [timeRange])
-
-  const fetchAnalyticsData = async () => {
-    try {
-      setLoading(true)
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      setStats({
-        totalUsers: 12500,
-        totalSessions: 28400,
-        avgSessionDuration: "4m 32s",
-        bounceRate: 24.5,
-        conversionRate: 3.2,
-        revenue: 1160000,
-      })
-    } catch (error) {
-      console.error("Error fetching analytics:", error)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const keyMetrics = [
+    {
+      title: locale === "ar" ? "إجمالي المستخدمين" : "Total Users",
+      value: "1,750",
+      change: "+12.5%",
+      icon: Users,
+      color: "text-[#1a365d]",
+      bgColor: "bg-[#1a365d]/10",
+    },
+    {
+      title: locale === "ar" ? "معدل الإشغال" : "Occupancy Rate",
+      value: "90%",
+      change: "+3.2%",
+      icon: Building2,
+      color: "text-green-600",
+      bgColor: "bg-green-100",
+    },
+    {
+      title: locale === "ar" ? "الإيرادات الشهرية" : "Monthly Revenue",
+      value: "$68,000",
+      change: "+15.3%",
+      icon: DollarSign,
+      color: "text-[#e53e3e]",
+      bgColor: "bg-[#e53e3e]/10",
+    },
+    {
+      title: locale === "ar" ? "معدل النمو" : "Growth Rate",
+      value: "18.2%",
+      change: "+2.1%",
+      icon: TrendingUp,
+      color: "text-blue-600",
+      bgColor: "bg-blue-100",
+    },
+  ]
 
   return (
-    <div className={cn("falcon-dashboard", locale === "ar" && "rtl")}>
-      <FalconSidebar locale={locale} onLocaleChange={setLocale} />
+    <div className="min-h-screen bg-slate-50">
+      <AdminSidebar locale={locale} onLocaleChange={setLocale} />
 
-      <div className={cn("lg:pl-72 flex flex-col flex-1", locale === "ar" && "lg:pl-0 lg:pr-72")}>
+      <div className={`${locale === "ar" ? "lg:mr-64" : "lg:ml-64"} transition-all duration-300`}>
         <FalconHeader
           title={locale === "ar" ? "التحليلات" : "Analytics"}
-          subtitle={
-            locale === "ar"
-              ? "تحليل شامل لأداء المنصة والمستخدمين"
-              : "Comprehensive platform and user performance insights"
-          }
+          subtitle={locale === "ar" ? "تحليل مفصل لأداء النظام" : "Detailed system performance analysis"}
           locale={locale}
         />
 
-        <main className="falcon-main p-6">
+        <main className="p-6">
           {/* Controls */}
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center space-x-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+            <div className="flex items-center gap-4">
               <Select value={timeRange} onValueChange={setTimeRange}>
-                <SelectTrigger className="w-48 falcon-select">
+                <SelectTrigger className="w-40">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="7d">{locale === "ar" ? "آخر 7 أيام" : "Last 7 days"}</SelectItem>
-                  <SelectItem value="30d">{locale === "ar" ? "آخر 30 يوم" : "Last 30 days"}</SelectItem>
-                  <SelectItem value="90d">{locale === "ar" ? "آخر 90 يوم" : "Last 90 days"}</SelectItem>
-                  <SelectItem value="1y">{locale === "ar" ? "آخر سنة" : "Last year"}</SelectItem>
+                  <SelectItem value="1month">{locale === "ar" ? "شهر واحد" : "1 Month"}</SelectItem>
+                  <SelectItem value="3months">{locale === "ar" ? "3 أشهر" : "3 Months"}</SelectItem>
+                  <SelectItem value="6months">{locale === "ar" ? "6 أشهر" : "6 Months"}</SelectItem>
+                  <SelectItem value="1year">{locale === "ar" ? "سنة واحدة" : "1 Year"}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            <Button className="falcon-btn-primary">
-              <Download className="h-4 w-4 mr-2" />
-              {locale === "ar" ? "تصدير التقرير" : "Export Report"}
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm">
+                <Calendar className="h-4 w-4 mr-2" />
+                {locale === "ar" ? "تخصيص التاريخ" : "Custom Date"}
+              </Button>
+              <Button size="sm" className="brandspace-button-primary">
+                <Download className="h-4 w-4 mr-2" />
+                {locale === "ar" ? "تصدير" : "Export"}
+              </Button>
+            </div>
           </div>
 
           {/* Key Metrics */}
-          <div className="falcon-grid falcon-grid-4 mb-8">
-            <FalconMetricCard
-              title={locale === "ar" ? "إجمالي المستخدمين" : "Total Users"}
-              value={loading ? "..." : stats.totalUsers.toLocaleString()}
-              change={{ value: "+12.5%", type: "positive" }}
-              icon={Users}
-              iconColor="text-blue-600"
-            />
-            <FalconMetricCard
-              title={locale === "ar" ? "إجمالي الجلسات" : "Total Sessions"}
-              value={loading ? "..." : stats.totalSessions.toLocaleString()}
-              change={{ value: "+8.2%", type: "positive" }}
-              icon={Activity}
-              iconColor="text-emerald-600"
-            />
-            <FalconMetricCard
-              title={locale === "ar" ? "معدل الارتداد" : "Bounce Rate"}
-              value={loading ? "..." : `${stats.bounceRate}%`}
-              change={{ value: "-2.1%", type: "positive" }}
-              icon={TrendingUp}
-              iconColor="text-purple-600"
-            />
-            <FalconMetricCard
-              title={locale === "ar" ? "معدل التحويل" : "Conversion Rate"}
-              value={loading ? "..." : `${stats.conversionRate}%`}
-              change={{ value: "+0.8%", type: "positive" }}
-              icon={DollarSign}
-              iconColor="text-orange-600"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {keyMetrics.map((metric, index) => (
+              <Card key={index} className="brandspace-card">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-slate-600">{metric.title}</p>
+                      <p className="text-2xl font-bold brandspace-text-primary mt-2">{metric.value}</p>
+                      <p className="text-sm text-green-600 mt-1">{metric.change}</p>
+                    </div>
+                    <div className={`p-3 rounded-lg ${metric.bgColor}`}>
+                      <metric.icon className={`h-6 w-6 ${metric.color}`} />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
 
+          {/* Analytics Tabs */}
           <Tabs defaultValue="overview" className="space-y-6">
-            <TabsList className="falcon-tabs-list">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="overview">{locale === "ar" ? "نظرة عامة" : "Overview"}</TabsTrigger>
               <TabsTrigger value="users">{locale === "ar" ? "المستخدمين" : "Users"}</TabsTrigger>
               <TabsTrigger value="revenue">{locale === "ar" ? "الإيرادات" : "Revenue"}</TabsTrigger>
-              <TabsTrigger value="traffic">{locale === "ar" ? "الزيارات" : "Traffic"}</TabsTrigger>
+              <TabsTrigger value="performance">{locale === "ar" ? "الأداء" : "Performance"}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
-              <div className="falcon-grid falcon-grid-3 mb-6">
-                <div className="lg:col-span-2">
-                  <Card className="falcon-card h-full">
-                    <CardHeader className="falcon-card-header">
-                      <CardTitle className="falcon-card-title">
-                        {locale === "ar" ? "أداء المستخدمين" : "User Performance"}
-                      </CardTitle>
-                      <CardDescription className="falcon-card-description">
-                        {locale === "ar" ? "المستخدمين والجلسات خلال الأشهر الماضية" : "Users and sessions over time"}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="falcon-card-content">
-                      <div className="h-80 w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <AreaChart data={performanceData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                            <defs>
-                              <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                              </linearGradient>
-                              <linearGradient id="colorSessions" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                                <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                              </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#cbd5e1" />
-                            <XAxis dataKey="month" stroke="#64748b" fontSize={12} />
-                            <YAxis stroke="#64748b" fontSize={12} />
-                            <Tooltip
-                              contentStyle={{
-                                backgroundColor: "white",
-                                border: "1px solid #e2e8f0",
-                                borderRadius: "12px",
-                                boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
-                              }}
-                              formatter={(value, name) => [
-                                value,
-                                name === "users"
-                                  ? locale === "ar"
-                                    ? "المستخدمين"
-                                    : "Users"
-                                  : locale === "ar"
-                                    ? "الجلسات"
-                                    : "Sessions",
-                              ]}
-                            />
-                            <Area
-                              type="monotone"
-                              dataKey="users"
-                              stroke="#3b82f6"
-                              strokeWidth={2}
-                              fillOpacity={1}
-                              fill="url(#colorUsers)"
-                              name="users"
-                            />
-                            <Area
-                              type="monotone"
-                              dataKey="sessions"
-                              stroke="#10b981"
-                              strokeWidth={2}
-                              fillOpacity={1}
-                              fill="url(#colorSessions)"
-                              name="sessions"
-                            />
-                          </AreaChart>
-                        </ResponsiveContainer>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                <Card className="falcon-card">
-                  <CardHeader className="falcon-card-header">
-                    <CardTitle className="falcon-card-title">
-                      {locale === "ar" ? "مصادر الزيارات" : "Traffic Sources"}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* User Growth Chart */}
+                <Card className="brandspace-card">
+                  <CardHeader>
+                    <CardTitle className="brandspace-text-primary">
+                      {locale === "ar" ? "نمو المستخدمين" : "User Growth"}
                     </CardTitle>
+                    <CardDescription>
+                      {locale === "ar" ? "نمو قاعدة المستخدمين مع الوقت" : "User base growth over time"}
+                    </CardDescription>
                   </CardHeader>
-                  <CardContent className="falcon-card-content">
-                    <div className="h-64 w-full">
+                  <CardContent>
+                    <div className="h-80">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <ComposedChart data={userGrowthData}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                          <XAxis dataKey="month" stroke="#64748b" />
+                          <YAxis stroke="#64748b" />
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: "white",
+                              border: "1px solid #e2e8f0",
+                              borderRadius: "8px",
+                            }}
+                          />
+                          <Area
+                            type="monotone"
+                            dataKey="users"
+                            fill="#1a365d"
+                            fillOpacity={0.1}
+                            stroke="#1a365d"
+                            strokeWidth={2}
+                          />
+                          <Bar dataKey="newUsers" fill="#e53e3e" radius={[2, 2, 0, 0]} />
+                        </ComposedChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Category Breakdown */}
+                <Card className="brandspace-card">
+                  <CardHeader>
+                    <CardTitle className="brandspace-text-primary">
+                      {locale === "ar" ? "توزيع الفئات" : "Category Breakdown"}
+                    </CardTitle>
+                    <CardDescription>
+                      {locale === "ar" ? "توزيع الإيرادات حسب الفئة" : "Revenue distribution by category"}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-64">
                       <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
                           <Pie
-                            data={trafficSources}
+                            data={categoryBreakdown}
                             cx="50%"
                             cy="50%"
                             innerRadius={60}
                             outerRadius={100}
-                            paddingAngle={2}
+                            paddingAngle={5}
                             dataKey="value"
                           >
-                            {trafficSources.map((entry, index) => (
+                            {categoryBreakdown.map((entry, index) => (
                               <Cell key={`cell-${index}`} fill={entry.color} />
                             ))}
                           </Pie>
-                          <Tooltip formatter={(value) => [`${value}%`, "Traffic"]} />
+                          <Tooltip />
                         </PieChart>
                       </ResponsiveContainer>
                     </div>
                     <div className="mt-4 space-y-2">
-                      {trafficSources.map((item, index) => (
+                      {categoryBreakdown.map((item, index) => (
                         <div key={index} className="flex items-center justify-between">
                           <div className="flex items-center">
                             <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: item.color }} />
                             <span className="text-sm text-slate-600">{item.name}</span>
                           </div>
-                          <span className="text-sm font-medium text-slate-900">{item.value}%</span>
+                          <div className="text-right">
+                            <span className="text-sm font-medium">{item.value}%</span>
+                            <p className="text-xs text-slate-500">${item.revenue.toLocaleString()}</p>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -284,97 +262,117 @@ export default function AnalyticsPage() {
               </div>
             </TabsContent>
 
-            <TabsContent value="users">
-              <Card className="falcon-card">
-                <CardHeader className="falcon-card-header">
-                  <CardTitle className="falcon-card-title">
+            <TabsContent value="users" className="space-y-6">
+              <Card className="brandspace-card">
+                <CardHeader>
+                  <CardTitle className="brandspace-text-primary">
                     {locale === "ar" ? "تحليل المستخدمين" : "User Analytics"}
                   </CardTitle>
+                  <CardDescription>
+                    {locale === "ar" ? "تفاصيل نشاط المستخدمين" : "Detailed user activity insights"}
+                  </CardDescription>
                 </CardHeader>
-                <CardContent className="falcon-card-content">
-                  <div className="h-96 w-full">
+                <CardContent>
+                  <div className="h-96">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={performanceData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                        <XAxis dataKey="month" stroke="#64748b" fontSize={12} />
-                        <YAxis stroke="#64748b" fontSize={12} />
-                        <Tooltip />
-                        <Bar dataKey="users" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="revenue">
-              <Card className="falcon-card">
-                <CardHeader className="falcon-card-header">
-                  <CardTitle className="falcon-card-title">
-                    {locale === "ar" ? "تحليل الإيرادات" : "Revenue Analytics"}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="falcon-card-content">
-                  <div className="h-96 w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={revenueData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                        <XAxis dataKey="month" stroke="#64748b" fontSize={12} />
-                        <YAxis stroke="#64748b" fontSize={12} />
-                        <Tooltip />
-                        <Area
-                          type="monotone"
-                          dataKey="revenue"
-                          stackId="1"
-                          stroke="#3b82f6"
-                          fill="#3b82f6"
-                          fillOpacity={0.6}
-                        />
-                        <Area
-                          type="monotone"
-                          dataKey="profit"
-                          stackId="2"
-                          stroke="#10b981"
-                          fill="#10b981"
-                          fillOpacity={0.6}
-                        />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="traffic">
-              <Card className="falcon-card">
-                <CardHeader className="falcon-card-header">
-                  <CardTitle className="falcon-card-title">
-                    {locale === "ar" ? "تحليل الزيارات" : "Traffic Analytics"}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="falcon-card-content">
-                  <div className="h-96 w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={performanceData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                        <XAxis dataKey="month" stroke="#64748b" fontSize={12} />
-                        <YAxis stroke="#64748b" fontSize={12} />
-                        <Tooltip />
-                        <Line
-                          type="monotone"
-                          dataKey="pageViews"
-                          stroke="#3b82f6"
-                          strokeWidth={2}
-                          dot={{ fill: "#3b82f6" }}
+                      <LineChart data={userGrowthData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                        <XAxis dataKey="month" stroke="#64748b" />
+                        <YAxis stroke="#64748b" />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: "white",
+                            border: "1px solid #e2e8f0",
+                            borderRadius: "8px",
+                          }}
                         />
                         <Line
                           type="monotone"
-                          dataKey="bounceRate"
-                          stroke="#ef4444"
+                          dataKey="users"
+                          stroke="#1a365d"
+                          strokeWidth={3}
+                          dot={{ fill: "#1a365d", strokeWidth: 2, r: 4 }}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="activeUsers"
+                          stroke="#e53e3e"
                           strokeWidth={2}
-                          dot={{ fill: "#ef4444" }}
+                          dot={{ fill: "#e53e3e", strokeWidth: 2, r: 3 }}
                         />
                       </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="revenue" className="space-y-6">
+              <Card className="brandspace-card">
+                <CardHeader>
+                  <CardTitle className="brandspace-text-primary">
+                    {locale === "ar" ? "تحليل الإيرادات" : "Revenue Analytics"}
+                  </CardTitle>
+                  <CardDescription>
+                    {locale === "ar" ? "تفصيل الإيرادات والأرباح" : "Revenue and profit breakdown"}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-96">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <ComposedChart data={revenueAnalytics}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                        <XAxis dataKey="month" stroke="#64748b" />
+                        <YAxis stroke="#64748b" />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: "white",
+                            border: "1px solid #e2e8f0",
+                            borderRadius: "8px",
+                          }}
+                        />
+                        <Bar dataKey="revenue" fill="#1a365d" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="expenses" fill="#718096" radius={[4, 4, 0, 0]} />
+                        <Line
+                          type="monotone"
+                          dataKey="profit"
+                          stroke="#e53e3e"
+                          strokeWidth={3}
+                          dot={{ fill: "#e53e3e", strokeWidth: 2, r: 4 }}
+                        />
+                      </ComposedChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="performance" className="space-y-6">
+              <Card className="brandspace-card">
+                <CardHeader>
+                  <CardTitle className="brandspace-text-primary">
+                    {locale === "ar" ? "أداء المولات" : "Mall Performance"}
+                  </CardTitle>
+                  <CardDescription>
+                    {locale === "ar" ? "مقارنة أداء المولات المختلفة" : "Performance comparison across different malls"}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-96">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={mallPerformance} layout="horizontal">
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                        <XAxis type="number" stroke="#64748b" />
+                        <YAxis dataKey="name" type="category" stroke="#64748b" width={100} />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: "white",
+                            border: "1px solid #e2e8f0",
+                            borderRadius: "8px",
+                          }}
+                        />
+                        <Bar dataKey="occupancy" fill="#1a365d" radius={[0, 4, 4, 0]} />
+                      </BarChart>
                     </ResponsiveContainer>
                   </div>
                 </CardContent>
