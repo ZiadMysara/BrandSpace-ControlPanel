@@ -44,10 +44,10 @@ export default function FalconDashboard() {
   // Show connection error if exists
   if (connectionError) {
     return (
-      <div className={cn("falcon-dashboard", locale === "ar" && "rtl")}>
+      <div className="sidebar-layout">
         <FalconSidebar locale={locale} onLocaleChange={setLocale} />
 
-        <div className={cn("lg:pl-72 flex flex-col flex-1", locale === "ar" && "lg:pl-0 lg:pr-72")}>
+        <div className="sidebar-content">
           <FalconHeader
             title={locale === "ar" ? "خطأ في الاتصال" : "Connection Error"}
             subtitle={locale === "ar" ? "فشل في الاتصال بقاعدة البيانات" : "Failed to connect to database"}
@@ -91,10 +91,10 @@ export default function FalconDashboard() {
   }
 
   return (
-    <div className={cn("falcon-dashboard", locale === "ar" && "rtl")}>
+    <div className="sidebar-layout">
       <FalconSidebar locale={locale} onLocaleChange={setLocale} />
 
-      <div className={cn("lg:pl-72 flex flex-col flex-1", locale === "ar" && "lg:pl-0 lg:pr-72")}>
+      <div className="sidebar-content">
         <FalconHeader
           title={locale === "ar" ? "مرحباً، أهلاً بك!" : "Good Afternoon, Admin!"}
           subtitle={

@@ -142,10 +142,41 @@ select:focus {
   }
 }
 
+/* MODERN SIDEBAR LAYOUT */
+.sidebar-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: rgb(248 250 252);
+}
+
+.sidebar-content {
+  flex: 1;
+  transition: margin-left 300ms ease-in-out;
+}
+
+/* Desktop: Always show content with sidebar */
+@media (min-width: 1024px) {
+  .sidebar-content {
+    margin-left: 288px; /* 72 * 4 = 288px for w-72 */
+  }
+  
+  .sidebar-content.collapsed {
+    margin-left: 64px; /* 16 * 4 = 64px for w-16 */
+  }
+}
+
+/* Mobile: Full width when sidebar is closed */
+@media (max-width: 1023px) {
+  .sidebar-content {
+    margin-left: 0;
+  }
+}
+
 /* FALCON STYLES - CLEAN SLATE */
 .falcon-dashboard {
   min-height: 100vh;
   background-color: rgb(248 250 252) !important;
+  display: flex;
 }
 
 .falcon-sidebar {
