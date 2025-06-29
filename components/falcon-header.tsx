@@ -1,9 +1,7 @@
 "use client"
-
-import { useState } from "react"
-import { Bell, Search, Settings, User, ChevronDown, Mail, Calendar, HelpCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,136 +10,139 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
+import { Bell, Search, Settings, User, LogOut, Menu, Globe } from "lucide-react"
+import { cn } from "@/lib/utils"
+import Image from "next/image"
 
-interface FalconHeaderProps {
+interface HeaderProps {
   title: string
   subtitle?: string
   locale: "en" | "ar"
+  onMenuClick?: () => void
 }
 
-export function FalconHeader({ title, subtitle, locale }: FalconHeaderProps) {
-  const [searchQuery, setSearchQuery] = useState("")
-
+export function FalconHeader({ title, subtitle, locale, onMenuClick }: HeaderProps) {
   return (
-    <header className="flex items-center justify-between p-6 bg-white border-b border-slate-200">
-      <div>
-        <h1 className="text-2xl font-bold brandspace-text-primary">{title}</h1>
-        {subtitle && <p className="text-sm text-slate-600 mt-1">{subtitle}</p>}
-      </div>
+    <header className={cn("sticky top-0 z-40 bg-white border-b border-slate-200 shadow-sm", locale === "ar" && "rtl")}>
+      <div className="flex h-16 items-center justify-between px-6">
+        {/* Left side - Mobile menu + Title */}
+        <div className="flex items-center space-x-4">
+          <Button variant="ghost" size="sm" className="lg:hidden" onClick={onMenuClick}>
+            <Menu className="h-5 w-5" />
+          </Button>
 
-      <div className="flex items-center space-x-4">
-        {/* Search - Brand Space style */}
-        <div className="hidden md:block">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+          {/* Logo for mobile */}
+          <div className="flex items-center space-x-3 lg:hidden">
+            <div className="relative w-8 h-8 rounded-lg overflow-hidden bg-slate-100 p-1">
+              <Image
+                src="/brandspace-logo.jpeg"
+                alt="BrandSpace"
+                width={32}
+                height={32}
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <span className="font-bold text-[#1a365d]">BrandSpace</span>
+          </div>
+
+          <div className="hidden lg:block">
+            <h1 className="text-2xl font-bold text-[#1a365d] mb-1">{title}</h1>
+            {subtitle && <p className="text-sm text-slate-600">{subtitle}</p>}
+          </div>
+        </div>
+
+        {/* Center - Search */}
+        <div className="hidden md:flex flex-1 max-w-md mx-8">
+          <div className="relative w-full">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
             <Input
               placeholder={locale === "ar" ? "البحث..." : "Search..."}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-80 pl-10 border-slate-200 focus:border-[#1a365d] focus:ring-[#1a365d]"
+              className="pl-10 bg-slate-50 border-slate-200 focus:bg-white focus:border-[#1a365d] transition-colors"
             />
           </div>
         </div>
 
-        {/* Notifications */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative hover:bg-slate-100">
-              <Bell className="h-5 w-5 text-slate-600" />
-              <span className="absolute -top-1 -right-1 h-4 w-4 bg-[#e53e3e] text-white text-xs rounded-full flex items-center justify-center">
-                3
-              </span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-80">
-            <DropdownMenuLabel>{locale === "ar" ? "الإشعارات" : "Notifications"}</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="p-4">
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-[#1a365d] rounded-full mt-2"></div>
-                <div>
-                  <p className="text-sm font-medium">New inquiry received</p>
-                  <p className="text-xs text-slate-500">2 minutes ago</p>
-                </div>
-              </div>
-            </DropdownMenuItem>
-            <DropdownMenuItem className="p-4">
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
-                <div>
-                  <p className="text-sm font-medium">Payment completed</p>
-                  <p className="text-xs text-slate-500">1 hour ago</p>
-                </div>
-              </div>
-            </DropdownMenuItem>
-            <DropdownMenuItem className="p-4">
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-[#e53e3e] rounded-full mt-2"></div>
-                <div>
-                  <p className="text-sm font-medium">New booking request</p>
-                  <p className="text-xs text-slate-500">3 hours ago</p>
-                </div>
-              </div>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {/* Right side - Actions */}
+        <div className="flex items-center space-x-4">
+          {/* Language Toggle */}
+          <Button variant="ghost" size="sm" className="hidden sm:flex text-slate-600 hover:text-[#1a365d]">
+            <Globe className="h-4 w-4 mr-2" />
+            {locale === "en" ? "العربية" : "English"}
+          </Button>
 
-        {/* Quick Actions */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="hover:bg-slate-100">
-              <Settings className="h-5 w-5 text-slate-600" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem>
-              <Mail className="mr-2 h-4 w-4" />
-              {locale === "ar" ? "الرسائل" : "Messages"}
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Calendar className="mr-2 h-4 w-4" />
-              {locale === "ar" ? "التقويم" : "Calendar"}
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <HelpCircle className="mr-2 h-4 w-4" />
-              {locale === "ar" ? "المساعدة" : "Help"}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        {/* User Menu - Brand Space style */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="flex items-center space-x-2 px-3 hover:bg-slate-100">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src="/placeholder-user.jpg" alt="User" />
-                <AvatarFallback className="bg-[#1a365d] text-white text-sm font-medium">AD</AvatarFallback>
-              </Avatar>
-              <div className="hidden md:block text-left">
-                <p className="text-sm font-medium brandspace-text-primary">Admin User</p>
-                <p className="text-xs text-slate-500">admin@brandspace.com</p>
+          {/* Notifications */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="relative text-slate-600 hover:text-[#1a365d]">
+                <Bell className="h-5 w-5" />
+                <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 text-xs bg-[#e53e3e] hover:bg-[#e53e3e]">
+                  3
+                </Badge>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-80">
+              <DropdownMenuLabel className="text-[#1a365d]">
+                {locale === "ar" ? "الإشعارات" : "Notifications"}
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <div className="space-y-2 p-2">
+                <div className="p-3 rounded-lg bg-blue-50 border border-blue-100">
+                  <p className="text-sm font-medium text-[#1a365d]">New inquiry received</p>
+                  <p className="text-xs text-slate-600">2 minutes ago</p>
+                </div>
+                <div className="p-3 rounded-lg bg-green-50 border border-green-100">
+                  <p className="text-sm font-medium text-[#1a365d]">Payment completed</p>
+                  <p className="text-xs text-slate-600">1 hour ago</p>
+                </div>
+                <div className="p-3 rounded-lg bg-orange-50 border border-orange-100">
+                  <p className="text-sm font-medium text-[#1a365d]">New user registered</p>
+                  <p className="text-xs text-slate-600">3 hours ago</p>
+                </div>
               </div>
-              <ChevronDown className="h-4 w-4 text-slate-500" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel>{locale === "ar" ? "حسابي" : "My Account"}</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <User className="mr-2 h-4 w-4" />
-              {locale === "ar" ? "الملف الشخصي" : "Profile"}
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Settings className="mr-2 h-4 w-4" />
-              {locale === "ar" ? "الإعدادات" : "Settings"}
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-[#e53e3e]">
-              {locale === "ar" ? "تسجيل الخروج" : "Sign out"}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* User Menu */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                <Avatar className="h-10 w-10 border-2 border-[#1a365d]">
+                  <AvatarImage src="/placeholder-user.jpg" alt="Admin" />
+                  <AvatarFallback className="bg-[#1a365d] text-white">AD</AvatarFallback>
+                </Avatar>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="end" forceMount>
+              <DropdownMenuLabel className="font-normal">
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium leading-none text-[#1a365d]">Admin User</p>
+                  <p className="text-xs leading-none text-slate-600">admin@brandspace.com</p>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="text-slate-700 hover:text-[#1a365d]">
+                <User className="mr-2 h-4 w-4" />
+                <span>{locale === "ar" ? "الملف الشخصي" : "Profile"}</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="text-slate-700 hover:text-[#1a365d]">
+                <Settings className="mr-2 h-4 w-4" />
+                <span>{locale === "ar" ? "الإعدادات" : "Settings"}</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="text-[#e53e3e] hover:text-[#e53e3e] hover:bg-red-50">
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>{locale === "ar" ? "تسجيل الخروج" : "Log out"}</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+
+      {/* Mobile title */}
+      <div className="lg:hidden px-6 pb-4">
+        <h1 className="text-xl font-bold text-[#1a365d] mb-1">{title}</h1>
+        {subtitle && <p className="text-sm text-slate-600">{subtitle}</p>}
       </div>
     </header>
   )
