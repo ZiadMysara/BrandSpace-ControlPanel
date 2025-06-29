@@ -47,11 +47,32 @@ export function useAuth() {
 // JWT utility functions
 const JWT_SECRET = "brandspace-secret-key-2024"
 
+// Helper functions for base64 encoding/decoding that work in both browser and Node.js
+function base64Encode(str: string): string {
+  if (typeof window !== 'undefined') {
+    // Browser environment
+    return btoa(str)
+  } else {
+    // Node.js environment
+    return Buffer.from(str).toString('base64')
+  }
+}
+
+function base64Decode(str: string): string {
+  if (typeof window !== 'undefined') {
+    // Browser environment
+    return atob(str)
+  } else {
+    // Node.js environment
+    return Buffer.from(str, 'base64').toString('utf8')
+  }
+}
+
 function createJWT(payload: any): string {
   const header = { alg: "HS256", typ: "JWT" }
-  const encodedHeader = btoa(JSON.stringify(header))
-  const encodedPayload = btoa(JSON.stringify(payload))
-  const signature = btoa(`${encodedHeader}.${encodedPayload}.${JWT_SECRET}`)
+  const encodedHeader = base64Encode(JSON.stringify(header))
+  const encodedPayload = base64Encode(JSON.stringify(payload))
+  const signature = base64Encode(`${encodedHeader}.${encodedPayload}.${JWT_SECRET}`)
   return `${encodedHeader}.${encodedPayload}.${signature}`
 }
 
@@ -60,7 +81,7 @@ function verifyJWT(token: string): any {
     const parts = token.split(".")
     if (parts.length !== 3) return null
 
-    const payload = JSON.parse(atob(parts[1]))
+    const payload = JSON.parse(base64Decode(parts[1]))
 
     // Check expiration
     if (payload.exp && Date.now() >= payload.exp * 1000) {
@@ -94,23 +115,32 @@ async function mockLogin(email: string, password: string): Promise<{ success: bo
   }
 
   // Check if user exists in localStorage (for demo purposes)
-  const users = JSON.parse(localStorage.getItem("brandspace_users") || "[]")
-  const user = users.find((u: any) => u.email === email)
+  if (typeof window !== 'undefined') {
+    const users = JSON.parse(localStorage.getItem("brandspace_users") || "[]")
+    const user = users.find((u: any) => u.email === email)
 
-  if (!user) {
-    return { success: false, error: "User not found" }
+    if (!user) {
+      return { success: false, error: "User not found" }
+    }
+
+    if (user.password !== password) {
+      return { success: false, error: "Invalid password" }
+    }
+
+    return { success: true, user: { ...user, password: undefined } }
   }
 
-  if (user.password !== password) {
-    return { success: false, error: "Invalid password" }
-  }
-
-  return { success: true, user: { ...user, password: undefined } }
+  return { success: false, error: "User not found" }
 }
 
 async function mockSignup(userData: SignupData): Promise<{ success: boolean; user?: User; error?: string }> {
   // Simulate API delay
   await new Promise((resolve) => setTimeout(resolve, 1500))
+
+  // Only proceed if we're in the browser
+  if (typeof window === 'undefined') {
+    return { success: false, error: "Signup not available during server-side rendering" }
+  }
 
   // Check if user already exists
   const users = JSON.parse(localStorage.getItem("brandspace_users") || "[]")
@@ -147,13 +177,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Check for existing token on mount
-    const token = localStorage.getItem("brandspace_token")
-    if (token) {
-      const payload = verifyJWT(token)
-      if (payload && payload.user) {
-        setUser(payload.user)
-      } else {
-        localStorage.removeItem("brandspace_token")
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem("brandspace_token")
+      if (token) {
+        const payload = verifyJWT(token)
+        if (payload && payload.user) {
+          setUser(payload.user)
+        } else {
+          localStorage.removeItem("brandspace_token")
+        }
       }
     }
     setIsLoading(false)
@@ -170,7 +202,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           exp: Math.floor(Date.now() / 1000) + 24 * 60 * 60, // 24 hours
         })
 
-        localStorage.setItem("brandspace_token", token)
+        if (typeof window !== 'undefined') {
+          localStorage.setItem("brandspace_token", token)
+        }
         setUser(result.user)
         return { success: true }
       }
@@ -201,7 +235,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const logout = () => {
-    localStorage.removeItem("brandspace_token")
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem("brandspace_token")
+    }
     setUser(null)
     router.push("/auth/login")
   }
