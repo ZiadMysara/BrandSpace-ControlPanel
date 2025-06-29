@@ -127,17 +127,15 @@ function SidebarContent({
   return (
     <div className="flex flex-col flex-grow bg-card border-r border-border">
       {/* Logo section with Brand Space styling */}
-      <div className="flex items-center justify-between p-6 brandspace-gradient">
+      <div className="flex items-center justify-center p-6 brandspace-gradient">
         <div className="flex items-center justify-center w-full">
-          <div className="backdrop-blur-sm bg-white/10 rounded-lg border border-white/20 shadow-lg p-3">
-            <Image
-              src="/brandspace-logo.jpeg"
-              alt="Brand Space Logo"
-              width={120}
-              height={40}
-              className="object-contain"
-            />
-          </div>
+          <Image
+            src="/brandspace-logo.jpeg"
+            alt="Brand Space Logo"
+            width={120}
+            height={40}
+            className="object-contain"
+          />
         </div>
         {onClose && (
           <Button

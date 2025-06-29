@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import { useState } from "react"
 import { AdminSidebar } from "@/components/admin-sidebar"
 import { FalconHeader } from "@/components/falcon-header"
@@ -48,10 +50,28 @@ const categoryData = [
   { name: "Services", value: 20, color: "#718096" },
 ]
 
+interface Metric {
+  title: string
+  value: string
+  change: string
+  trend: "up" | "down"
+  icon: React.ComponentType<any>
+  color: string
+  bgColor: string
+}
+
+interface Activity {
+  id: number
+  type: string
+  message: string
+  time: string
+  status: "success" | "pending" | "info"
+}
+
 export default function AdminDashboard() {
   const [locale, setLocale] = useState<"en" | "ar">("en")
 
-  const metrics = [
+  const metrics: Metric[] = [
     {
       title: locale === "ar" ? "إجمالي المستخدمين" : "Total Users",
       value: "12,543",
@@ -90,7 +110,7 @@ export default function AdminDashboard() {
     },
   ]
 
-  const recentActivities = [
+  const recentActivities: Activity[] = [
     {
       id: 1,
       type: "booking",

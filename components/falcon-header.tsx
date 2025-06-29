@@ -55,9 +55,7 @@ export function FalconHeader({ title, subtitle, locale }: FalconHeaderProps) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-80">
-            <DropdownMenuLabel className="font-semibold">
-              {locale === "ar" ? "الإشعارات" : "Notifications"}
-            </DropdownMenuLabel>
+            <DropdownMenuLabel>{locale === "ar" ? "الإشعارات" : "Notifications"}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="p-4">
               <div className="flex items-start space-x-3">
