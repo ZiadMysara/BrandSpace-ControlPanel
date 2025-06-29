@@ -24,6 +24,7 @@ import {
   TrendingUp,
   FileText,
   Shield,
+  ChevronRight,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -114,18 +115,43 @@ export function FalconSidebar({ locale, onLocaleChange }: FalconSidebarProps) {
 
   return (
     <>
-      {/* Mobile sidebar overlay */}
+      {/* Enhanced Mobile Menu Button */}
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={() => setSidebarOpen(true)}
+        className={cn(
+          "fixed top-6 z-50 lg:hidden",
+          "w-12 h-12 rounded-xl",
+          "bg-white/95 backdrop-blur-md border-slate-200/60 shadow-lg",
+          "hover:bg-white hover:shadow-xl hover:scale-105",
+          "active:scale-95 transition-all duration-200 ease-out",
+          "focus:ring-2 focus:ring-blue-500/20 focus:ring-offset-2",
+          "border-2 hover:border-slate-300",
+          locale === "ar" ? "right-6" : "left-6"
+        )}
+        aria-label={locale === "ar" ? "فتح القائمة" : "Open menu"}
+      >
+        <Menu className="h-5 w-5 text-slate-700" strokeWidth={2} />
+      </Button>
+
+      {/* Enhanced Mobile Overlay */}
       {sidebarOpen && (
-        <div className="fixed inset-0 z-40 bg-black bg-opacity-25 lg:hidden" onClick={() => setSidebarOpen(false)} />
+        <div 
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden transition-all duration-300 ease-out" 
+          onClick={() => setSidebarOpen(false)}
+          aria-hidden="true"
+        />
       )}
 
-      {/* Mobile sidebar */}
+      {/* Mobile Sidebar */}
       <div
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-72 transform transition-transform duration-300 ease-in-out lg:hidden",
-          sidebarOpen ? "translate-x-0" : "-translate-x-full",
+          "fixed inset-y-0 z-50 w-80 transform transition-all duration-300 ease-out lg:hidden",
+          "shadow-2xl",
+          sidebarOpen ? "translate-x-0 opacity-100" : "-translate-x-full opacity-0",
           locale === "ar" && "right-0 left-auto",
-          locale === "ar" && (sidebarOpen ? "-translate-x-0" : "translate-x-full"),
+          locale === "ar" && (sidebarOpen ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"),
         )}
       >
         <SidebarContent
@@ -133,32 +159,34 @@ export function FalconSidebar({ locale, onLocaleChange }: FalconSidebarProps) {
           onLocaleChange={onLocaleChange}
           pathname={pathname}
           onClose={() => setSidebarOpen(false)}
+          isMobile={true}
         />
       </div>
 
-      {/* Desktop sidebar */}
+      {/* Desktop Sidebar */}
       <div
         className={cn(
-          "hidden lg:fixed lg:inset-y-0 lg:flex lg:w-72 lg:flex-col",
+          "hidden lg:fixed lg:inset-y-0 lg:flex lg:w-80 lg:flex-col",
           locale === "ar" && "lg:right-0 lg:left-auto",
         )}
       >
-        <SidebarContent locale={locale} onLocaleChange={onLocaleChange} pathname={pathname} />
-      </div>
-
-      {/* Mobile menu button */}
-      <div className="lg:hidden">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setSidebarOpen(true)}
-          className={cn("fixed top-4 z-40 bg-white shadow-md", locale === "ar" ? "right-4" : "left-4")}
-        >
-          <Menu className="h-5 w-5" />
-        </Button>
+        <SidebarContent 
+          locale={locale} 
+          onLocaleChange={onLocaleChange} 
+          pathname={pathname} 
+          isMobile={false}
+        />
       </div>
     </>
   )
+}
+
+interface SidebarContentProps {
+  locale: "en" | "ar"
+  onLocaleChange: (locale: "en" | "ar") => void
+  pathname: string
+  onClose?: () => void
+  isMobile: boolean
 }
 
 function SidebarContent({
@@ -166,51 +194,58 @@ function SidebarContent({
   onLocaleChange,
   pathname,
   onClose,
-}: {
-  locale: "en" | "ar"
-  onLocaleChange: (locale: "en" | "ar") => void
-  pathname: string
-  onClose?: () => void
-}) {
+  isMobile,
+}: SidebarContentProps) {
   const { theme, setTheme } = useTheme()
   const navGroups = locale === "ar" ? navigationGroupsAr : navigationGroups
 
   return (
-    <div className="falcon-sidebar flex flex-col flex-grow h-full">
-      {/* Logo section - Exact Falcon style */}
-      <div className="falcon-sidebar-header">
-        <div className="falcon-sidebar-brand">
-          <div className="falcon-sidebar-logo">
-            <Zap className="w-5 h-5 text-white" />
+    <div className="flex flex-col h-full bg-white/95 backdrop-blur-xl border-r border-slate-200/60 shadow-2xl">
+      {/* Enhanced Header */}
+      <div className="flex items-center justify-between p-6 border-b border-slate-100/80 bg-gradient-to-r from-blue-50/50 to-indigo-50/50">
+        <div className="flex items-center space-x-3">
+          <div className="relative">
+            <div className="w-11 h-11 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg">
+              <Zap className="w-6 h-6 text-white" strokeWidth={2.5} />
+            </div>
+            <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
           </div>
           <div>
-            <div className="falcon-sidebar-title">BrandSpace</div>
-            <div className="falcon-sidebar-subtitle">Admin Panel</div>
+            <h1 className="text-xl font-bold text-slate-900 tracking-tight">BrandSpace</h1>
+            <p className="text-sm text-slate-500 font-medium">Admin Panel</p>
           </div>
         </div>
-        {onClose && (
-          <Button variant="ghost" size="icon" onClick={onClose} className="lg:hidden">
-            <X className="h-5 w-5" />
+        {isMobile && (
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={onClose}
+            className="text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+          >
+            <X className="h-5 w-5" strokeWidth={2} />
           </Button>
         )}
       </div>
 
-      {/* Search - Falcon style */}
-      <div className="falcon-nav-section">
-        <div className="falcon-search">
-          <Search className="falcon-search-icon" />
+      {/* Enhanced Search */}
+      <div className="p-4 border-b border-slate-100/80">
+        <div className="relative group">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4 group-focus-within:text-blue-500 transition-colors" />
           <Input
             placeholder={locale === "ar" ? "البحث..." : "Search..."}
-            className="falcon-search-input text-slate-900 placeholder:text-slate-500"
+            className="pl-10 bg-slate-50/80 border-slate-200/60 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 rounded-lg"
           />
         </div>
       </div>
 
-      {/* Navigation - Exact Falcon structure */}
-      <nav className="flex-1 px-4 pb-6 space-y-6 overflow-y-auto">
+      {/* Enhanced Navigation */}
+      <nav className="flex-1 px-4 py-6 space-y-8 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent">
         {navGroups.map((group, groupIndex) => (
-          <div key={groupIndex}>
-            <div className="falcon-nav-title">{group.title}</div>
+          <div key={groupIndex} className="space-y-3">
+            <h3 className="px-3 text-xs font-bold text-slate-500 uppercase tracking-wider mb-4 flex items-center">
+              {group.title}
+              <div className="flex-1 h-px bg-gradient-to-r from-slate-200 to-transparent ml-3"></div>
+            </h3>
             <div className="space-y-1">
               {group.items.map((item) => {
                 const isActive = pathname === item.href
@@ -219,10 +254,32 @@ function SidebarContent({
                     key={item.href}
                     href={item.href}
                     onClick={onClose}
-                    className={cn("falcon-nav-item", isActive && "active", locale === "ar" && "flex-row-reverse")}
+                    className={cn(
+                      "group flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200",
+                      "hover:bg-slate-50 hover:text-slate-900 hover:shadow-sm",
+                      "focus:outline-none focus:ring-2 focus:ring-blue-500/20",
+                      locale === "ar" && "flex-row-reverse",
+                      isActive
+                        ? "bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 shadow-sm border border-blue-100/50"
+                        : "text-slate-600 hover:border-slate-200/50"
+                    )}
                   >
-                    <item.icon className="falcon-nav-icon" />
-                    {item.name}
+                    <div className={cn(
+                      "flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200",
+                      locale === "ar" ? "ml-3" : "mr-3",
+                      isActive 
+                        ? "bg-blue-100 text-blue-600" 
+                        : "text-slate-500 group-hover:bg-slate-100 group-hover:text-slate-700"
+                    )}>
+                      <item.icon className="h-4 w-4" strokeWidth={2} />
+                    </div>
+                    <span className="flex-1">{item.name}</span>
+                    {isActive && (
+                      <ChevronRight className={cn(
+                        "h-4 w-4 text-blue-500",
+                        locale === "ar" && "rotate-180"
+                      )} />
+                    )}
                   </Link>
                 )
               })}
@@ -231,44 +288,56 @@ function SidebarContent({
         ))}
       </nav>
 
-      {/* Footer controls - Clean Falcon style */}
-      <div className="p-4 border-t border-slate-100 space-y-2">
-        {/* Language toggle */}
+      {/* Enhanced Footer Controls */}
+      <div className="p-4 border-t border-slate-100/80 bg-slate-50/30 space-y-2">
         <Button
           variant="ghost"
           size="sm"
           onClick={() => onLocaleChange(locale === "en" ? "ar" : "en")}
           className={cn(
-            "w-full justify-start text-slate-600 hover:text-slate-900 hover:bg-slate-50",
-            locale === "ar" && "flex-row-reverse",
+            "w-full justify-start text-slate-600 hover:text-slate-900 hover:bg-white/60 rounded-lg transition-all duration-200",
+            "focus:ring-2 focus:ring-blue-500/20",
+            locale === "ar" && "flex-row-reverse"
           )}
         >
-          <Globe className={cn("h-4 w-4", locale === "ar" ? "ml-2" : "mr-2")} />
-          {locale === "en" ? "العربية" : "English"}
+          <div className={cn(
+            "flex items-center justify-center w-8 h-8 rounded-lg bg-slate-100 text-slate-600",
+            locale === "ar" ? "ml-2" : "mr-2"
+          )}>
+            <Globe className="h-4 w-4" strokeWidth={2} />
+          </div>
+          <span className="font-medium">{locale === "en" ? "العربية" : "English"}</span>
         </Button>
 
-        {/* Theme toggle */}
         <Button
           variant="ghost"
           size="sm"
           onClick={() => setTheme(theme === "light" ? "dark" : "light")}
           className={cn(
-            "w-full justify-start text-slate-600 hover:text-slate-900 hover:bg-slate-50",
-            locale === "ar" && "flex-row-reverse",
+            "w-full justify-start text-slate-600 hover:text-slate-900 hover:bg-white/60 rounded-lg transition-all duration-200",
+            "focus:ring-2 focus:ring-blue-500/20",
+            locale === "ar" && "flex-row-reverse"
           )}
         >
-          {theme === "light" ? (
-            <Moon className={cn("h-4 w-4", locale === "ar" ? "ml-2" : "mr-2")} />
-          ) : (
-            <Sun className={cn("h-4 w-4", locale === "ar" ? "ml-2" : "mr-2")} />
-          )}
-          {theme === "light"
-            ? locale === "ar"
-              ? "الوضع المظلم"
-              : "Dark Mode"
-            : locale === "ar"
-              ? "الوضع المضيء"
-              : "Light Mode"}
+          <div className={cn(
+            "flex items-center justify-center w-8 h-8 rounded-lg bg-slate-100 text-slate-600",
+            locale === "ar" ? "ml-2" : "mr-2"
+          )}>
+            {theme === "light" ? (
+              <Moon className="h-4 w-4" strokeWidth={2} />
+            ) : (
+              <Sun className="h-4 w-4" strokeWidth={2} />
+            )}
+          </div>
+          <span className="font-medium">
+            {theme === "light"
+              ? locale === "ar"
+                ? "الوضع المظلم"
+                : "Dark Mode"
+              : locale === "ar"
+                ? "الوضع المضيء"
+                : "Light Mode"}
+          </span>
         </Button>
       </div>
     </div>
