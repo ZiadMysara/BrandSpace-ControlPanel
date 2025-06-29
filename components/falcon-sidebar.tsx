@@ -114,7 +114,7 @@ export function FalconSidebar({ locale, onLocaleChange }: FalconSidebarProps) {
   const [isMobile, setIsMobile] = useState(false)
   const pathname = usePathname()
 
-  // Check if screen is mobile
+  // Check if screen is mobile and update body class for sidebar state
   useEffect(() => {
     const checkScreenSize = () => {
       const mobile = window.innerWidth < 1024
@@ -131,6 +131,18 @@ export function FalconSidebar({ locale, onLocaleChange }: FalconSidebarProps) {
     window.addEventListener('resize', checkScreenSize)
     return () => window.removeEventListener('resize', checkScreenSize)
   }, [])
+
+  // Update content margin based on sidebar state
+  useEffect(() => {
+    const sidebarContent = document.querySelector('.sidebar-content')
+    if (sidebarContent && !isMobile) {
+      if (isCollapsed) {
+        sidebarContent.classList.add('collapsed')
+      } else {
+        sidebarContent.classList.remove('collapsed')
+      }
+    }
+  }, [isCollapsed, isMobile])
 
   const toggleSidebar = () => {
     if (isMobile) {
@@ -165,7 +177,7 @@ export function FalconSidebar({ locale, onLocaleChange }: FalconSidebarProps) {
       {/* Sidebar */}
       <div
         className={cn(
-          "fixed left-0 top-0 z-40 h-full bg-white border-r border-slate-200 transition-all duration-300 ease-in-out",
+          "fixed left-0 top-0 z-40 h-full bg-white border-r border-slate-200 transition-all duration-300 ease-in-out shadow-lg",
           // Desktop behavior
           "lg:translate-x-0",
           isCollapsed && !isMobile ? "lg:w-16" : "lg:w-72",

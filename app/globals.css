@@ -142,33 +142,107 @@ select:focus {
   }
 }
 
-/* MODERN SIDEBAR LAYOUT */
+/* MODERN SIDEBAR LAYOUT SYSTEM */
 .sidebar-layout {
   display: flex;
   min-height: 100vh;
   background-color: rgb(248 250 252);
+  position: relative;
 }
 
 .sidebar-content {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0; /* Prevent flex item from overflowing */
   transition: margin-left 300ms ease-in-out;
+  background-color: rgb(248 250 252);
 }
 
-/* Desktop: Always show content with sidebar */
+/* Desktop Responsive Behavior */
 @media (min-width: 1024px) {
   .sidebar-content {
-    margin-left: 288px; /* 72 * 4 = 288px for w-72 */
+    margin-left: 288px; /* Default expanded sidebar width (w-72) */
   }
   
   .sidebar-content.collapsed {
-    margin-left: 64px; /* 16 * 4 = 64px for w-16 */
+    margin-left: 64px; /* Collapsed sidebar width (w-16) */
   }
 }
 
-/* Mobile: Full width when sidebar is closed */
+/* Mobile Behavior */
 @media (max-width: 1023px) {
   .sidebar-content {
-    margin-left: 0;
+    margin-left: 0; /* Full width on mobile */
+  }
+}
+
+/* Ensure content areas are responsive */
+.falcon-main {
+  flex: 1;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Grid system that adapts to sidebar */
+.falcon-grid {
+  display: grid;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.falcon-grid-1 {
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+.falcon-grid-2 {
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+.falcon-grid-3 {
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+.falcon-grid-4 {
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+/* Responsive grid breakpoints */
+@media (min-width: 640px) {
+  .falcon-grid-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .falcon-grid-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 768px) {
+  .falcon-grid-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .falcon-grid-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .falcon-grid-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .falcon-grid-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* Adjust grid for collapsed sidebar on large screens */
+@media (min-width: 1200px) {
+  .sidebar-content.collapsed .falcon-grid-4 {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+  .sidebar-content.collapsed .falcon-grid-3 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
@@ -262,15 +336,12 @@ select:focus {
   flex-shrink: 0;
 }
 
-.falcon-main {
-  flex: 1;
-  background-color: rgb(248 250 252) !important;
-}
-
 .falcon-header {
   background-color: rgb(255 255 255) !important;
   border-bottom: 1px solid rgb(226 232 240);
   padding: 1rem 1.5rem;
+  width: 100%;
+  flex-shrink: 0;
 }
 
 .falcon-page-title {
@@ -290,6 +361,7 @@ select:focus {
   border: 1px solid rgb(226 232 240);
   box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
   transition: all 200ms;
+  width: 100%;
 }
 
 .falcon-card:hover {
@@ -468,10 +540,13 @@ select:focus {
   border: 1px solid rgb(226 232 240);
   overflow: hidden;
   background-color: rgb(255 255 255) !important;
+  width: 100%;
+  overflow-x: auto;
 }
 
 .falcon-table {
   width: 100%;
+  min-width: 100%;
 }
 
 .falcon-table thead {
@@ -486,6 +561,7 @@ select:focus {
   color: rgb(71 85 105);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  white-space: nowrap;
 }
 
 .falcon-table td {
@@ -554,53 +630,6 @@ select:focus {
   color: rgb(15 23 42) !important;
 }
 
-.falcon-grid {
-  display: grid;
-  gap: 1.5rem;
-}
-
-.falcon-grid-1 {
-  grid-template-columns: repeat(1, minmax(0, 1fr));
-}
-
-.falcon-grid-2 {
-  grid-template-columns: repeat(1, minmax(0, 1fr));
-}
-
-.falcon-grid-3 {
-  grid-template-columns: repeat(1, minmax(0, 1fr));
-}
-
-.falcon-grid-4 {
-  grid-template-columns: repeat(1, minmax(0, 1fr));
-}
-
-@media (min-width: 640px) {
-  .falcon-grid-4 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 768px) {
-  .falcon-grid-3 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 1024px) {
-  .falcon-grid-2 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .falcon-grid-3 {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .falcon-grid-4 {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
 /* FALCON METRIC CARD STYLES */
 .falcon-metric-card {
   background-color: rgb(255 255 255) !important;
@@ -609,6 +638,7 @@ select:focus {
   box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
   padding: 1.5rem;
   transition: all 200ms;
+  width: 100%;
 }
 
 .falcon-metric-card:hover {

@@ -288,10 +288,10 @@ export default function UsersPage() {
   })
 
   return (
-    <div className={cn("min-h-screen bg-slate-50", locale === "ar" && "rtl")}>
+    <div className="sidebar-layout">
       <FalconSidebar locale={locale} onLocaleChange={setLocale} />
 
-      <div className={cn("lg:pl-72 flex flex-col flex-1", locale === "ar" && "lg:pl-0 lg:pr-72")}>
+      <div className="sidebar-content">
         <FalconHeader
           title={locale === "ar" ? "إدارة المستخدمين" : "User Management"}
           subtitle={
@@ -301,9 +301,9 @@ export default function UsersPage() {
         />
 
         {/* Main content */}
-        <main className="flex-1 p-6">
+        <main className="falcon-main p-6">
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+          <div className="falcon-grid falcon-grid-4 mb-6">
             <Card className="falcon-card">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
@@ -542,7 +542,7 @@ export default function UsersPage() {
               </div>
 
               {/* Users Table */}
-              <div className="rounded-xl border border-slate-200 overflow-hidden">
+              <div className="falcon-table-container">
                 <Table className="falcon-table">
                   <TableHeader>
                     <TableRow className="bg-slate-50">
@@ -610,7 +610,7 @@ export default function UsersPage() {
                                   ? "نشط"
                                   : "Active"
                                 : locale === "ar"
-                                  ? "��ير نشط"
+                                  ? "غير نشط"
                                   : "Inactive"}
                             </span>
                           </TableCell>
