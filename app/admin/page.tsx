@@ -304,7 +304,7 @@ export default function FalconDashboard() {
                 <div className="space-y-4">
                   {recentActivities.length > 0 ? (
                     recentActivities.map((activity) => (
-                      <div key={activity.id} className="flex items-start space-x-3">
+                      <div key={`${activity.type}-${activity.id}`} className="flex items-start space-x-3">
                         <Avatar className="h-8 w-8 falcon-avatar">
                           <AvatarFallback className="bg-blue-100 text-blue-700 text-xs">{activity.avatar}</AvatarFallback>
                         </Avatar>
