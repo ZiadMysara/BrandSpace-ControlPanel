@@ -154,18 +154,6 @@ export function FalconSidebar({ locale, onLocaleChange }: FalconSidebarProps) {
 
   return (
     <>
-      {/* Mobile Menu Button */}
-      {isMobile && (
-        <Button
-          onClick={toggleSidebar}
-          className="fixed top-4 left-4 z-50 lg:hidden bg-white shadow-lg border border-slate-200 hover:bg-slate-50"
-          size="icon"
-          variant="outline"
-        >
-          {isMobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </Button>
-      )}
-
       {/* Mobile Overlay */}
       {isMobile && isMobileOpen && (
         <div 
@@ -194,6 +182,7 @@ export function FalconSidebar({ locale, onLocaleChange }: FalconSidebarProps) {
           isCollapsed={isCollapsed && !isMobile}
           onToggle={toggleSidebar}
           isMobile={isMobile}
+          isMobileOpen={isMobileOpen}
         />
       </div>
     </>
@@ -207,6 +196,7 @@ interface SidebarContentProps {
   isCollapsed: boolean
   onToggle: () => void
   isMobile: boolean
+  isMobileOpen: boolean
 }
 
 function SidebarContent({
@@ -216,6 +206,7 @@ function SidebarContent({
   isCollapsed,
   onToggle,
   isMobile,
+  isMobileOpen,
 }: SidebarContentProps) {
   const { theme, setTheme } = useTheme()
   const navGroups = locale === "ar" ? navigationGroupsAr : navigationGroups
@@ -224,8 +215,20 @@ function SidebarContent({
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-slate-100">
+        {/* Mobile Menu Button - Integrated into header */}
+        {isMobile && (
+          <Button
+            onClick={onToggle}
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-slate-500 hover:text-slate-700 hover:bg-slate-100 lg:hidden"
+          >
+            {isMobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+          </Button>
+        )}
+        
         {!isCollapsed && (
-          <div className="flex items-center space-x-3">
+          <div className={cn("flex items-center space-x-3", isMobile && "ml-3")}>
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
               <Zap className="w-5 h-5 text-white" />
             </div>
@@ -236,7 +239,7 @@ function SidebarContent({
           </div>
         )}
         
-        {/* Toggle Button - Only show on desktop */}
+        {/* Desktop Toggle Button */}
         {!isMobile && (
           <Button
             onClick={onToggle}
