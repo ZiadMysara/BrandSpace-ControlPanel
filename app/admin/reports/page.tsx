@@ -22,30 +22,7 @@ import {
 } from "lucide-react"
 import { format } from "date-fns"
 import { supabase } from "@/lib/supabase"
-import {
-  ResponsiveContainer,
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  BarChart,
-  Bar,
-  LineChart,
-  Line,
-} from "recharts"
 import { FalconMetricCard } from "@/components/falcon-metric-card"
-
-// Sample report data
-const monthlyReportData = [
-  { month: "Jan", users: 1200, malls: 15, shops: 450, revenue: 125000 },
-  { month: "Feb", users: 1400, malls: 18, shops: 520, revenue: 180000 },
-  { month: "Mar", users: 1100, malls: 16, shops: 480, revenue: 165000 },
-  { month: "Apr", users: 1600, malls: 22, shops: 650, revenue: 220000 },
-  { month: "May", users: 1800, malls: 25, shops: 720, revenue: 195000 },
-  { month: "Jun", users: 2000, malls: 28, shops: 800, revenue: 275000 },
-]
 
 interface ReportData {
   totalUsers: number
@@ -88,7 +65,7 @@ export default function ReportsPage() {
       const { count: shopsCount } = await supabase.from("shops").select("*", { count: "exact", head: true })
 
       // Fetch payments for revenue calculation
-      const { data: payments } = await supabase.from("payments").select("amount").eq("status", "completed")
+      const { data: payments } = await supabase.from("payments").select("amount").eq("payment_status", "completed")
 
       const totalRevenue = payments?.reduce((sum, payment) => sum + payment.amount, 0) || 0
 
@@ -216,72 +193,47 @@ export default function ReportsPage() {
               <TabsTrigger value="overview">{locale === "ar" ? "نظرة عامة" : "Overview"}</TabsTrigger>
               <TabsTrigger value="users">{locale === "ar" ? "المستخدمين" : "Users"}</TabsTrigger>
               <TabsTrigger value="revenue">{locale === "ar" ? "الإيرادات" : "Revenue"}</TabsTrigger>
-              <TabsTrigger value="performance">{locale === "ar" ? "الأداء" : "Performance"}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
-              <div className="falcon-grid falcon-grid-2">
-                <Card className="falcon-card">
-                  <CardHeader className="falcon-card-header">
-                    <CardTitle className="falcon-card-title flex items-center">
-                      <BarChart3 className="w-5 h-5 mr-2" />
-                      {locale === "ar" ? "نمو المنصة" : "Platform Growth"}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="falcon-card-content">
-                    <div className="h-80">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={monthlyReportData}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                          <XAxis dataKey="month" stroke="#64748b" fontSize={12} />
-                          <YAxis stroke="#64748b" fontSize={12} />
-                          <Tooltip />
-                          <Area type="monotone" dataKey="users" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.6} />
-                        </AreaChart>
-                      </ResponsiveContainer>
+              <Card className="falcon-card">
+                <CardHeader className="falcon-card-header">
+                  <CardTitle className="falcon-card-title flex items-center">
+                    <BarChart3 className="w-5 h-5 mr-2" />
+                    {locale === "ar" ? "ملخص البيانات" : "Data Summary"}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="falcon-card-content">
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-slate-600">
+                        {locale === "ar" ? "المستخدمين النشطين" : "Active Users"}
+                      </span>
+                      <span className="font-semibold text-slate-900">
+                        {reportData?.totalUsers || 0}
+                      </span>
                     </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="falcon-card">
-                  <CardHeader className="falcon-card-header">
-                    <CardTitle className="falcon-card-title flex items-center">
-                      <Activity className="w-5 h-5 mr-2" />
-                      {locale === "ar" ? "النشاط الحالي" : "Current Activity"}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="falcon-card-content">
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-slate-600">
-                          {locale === "ar" ? "المستخدمين النشطين" : "Active Users"}
-                        </span>
-                        <span className="font-semibold text-slate-900">
-                          {Math.floor((reportData?.totalUsers || 0) * 0.7)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-slate-600">
-                          {locale === "ar" ? "الحجوزات اليوم" : "Today's Bookings"}
-                        </span>
-                        <span className="font-semibold text-slate-900">24</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-slate-600">
-                          {locale === "ar" ? "الاستفسارات الجديدة" : "New Inquiries"}
-                        </span>
-                        <span className="font-semibold text-slate-900">12</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-slate-600">
-                          {locale === "ar" ? "معدل التحويل" : "Conversion Rate"}
-                        </span>
-                        <span className="font-semibold text-green-600">3.2%</span>
-                      </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-slate-600">
+                        {locale === "ar" ? "المولات المتاحة" : "Available Malls"}
+                      </span>
+                      <span className="font-semibold text-slate-900">{reportData?.totalMalls || 0}</span>
                     </div>
-                  </CardContent>
-                </Card>
-              </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-slate-600">
+                        {locale === "ar" ? "المحلات المتاحة" : "Available Shops"}
+                      </span>
+                      <span className="font-semibold text-slate-900">{reportData?.totalShops || 0}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-slate-600">
+                        {locale === "ar" ? "إجمالي الإيرادات" : "Total Revenue"}
+                      </span>
+                      <span className="font-semibold text-green-600">${reportData?.totalRevenue.toLocaleString() || 0}</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </TabsContent>
 
             <TabsContent value="users">
@@ -295,16 +247,12 @@ export default function ReportsPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="falcon-card-content">
-                  <div className="h-80">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={monthlyReportData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                        <XAxis dataKey="month" stroke="#64748b" fontSize={12} />
-                        <YAxis stroke="#64748b" fontSize={12} />
-                        <Tooltip />
-                        <Bar dataKey="users" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                      </BarChart>
-                    </ResponsiveContainer>
+                  <div className="text-center py-12">
+                    <p className="text-slate-600">
+                      {locale === "ar"
+                        ? `إجمالي المستخدمين المسجلين: ${reportData?.totalUsers || 0}`
+                        : `Total Registered Users: ${reportData?.totalUsers || 0}`}
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -321,49 +269,12 @@ export default function ReportsPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="falcon-card-content">
-                  <div className="h-80">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={monthlyReportData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                        <XAxis dataKey="month" stroke="#64748b" fontSize={12} />
-                        <YAxis stroke="#64748b" fontSize={12} />
-                        <Tooltip />
-                        <Line
-                          type="monotone"
-                          dataKey="revenue"
-                          stroke="#10b981"
-                          strokeWidth={3}
-                          dot={{ fill: "#10b981", strokeWidth: 2, r: 4 }}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="performance">
-              <Card className="falcon-card">
-                <CardHeader className="falcon-card-header">
-                  <CardTitle className="falcon-card-title">
-                    {locale === "ar" ? "تحليل الأداء" : "Performance Analytics"}
-                  </CardTitle>
-                  <CardDescription className="falcon-card-description">
-                    {locale === "ar" ? "مقاييس الأداء والاستخدام" : "Performance metrics and usage statistics"}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="falcon-card-content">
-                  <div className="h-80">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={monthlyReportData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                        <XAxis dataKey="month" stroke="#64748b" fontSize={12} />
-                        <YAxis stroke="#64748b" fontSize={12} />
-                        <Tooltip />
-                        <Area type="monotone" dataKey="malls" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.6} />
-                        <Area type="monotone" dataKey="shops" stroke="#f97316" fill="#f97316" fillOpacity={0.6} />
-                      </AreaChart>
-                    </ResponsiveContainer>
+                  <div className="text-center py-12">
+                    <p className="text-slate-600">
+                      {locale === "ar"
+                        ? `إجمالي الإيرادات: $${reportData?.totalRevenue.toLocaleString() || 0}`
+                        : `Total Revenue: $${reportData?.totalRevenue.toLocaleString() || 0}`}
+                    </p>
                   </div>
                 </CardContent>
               </Card>

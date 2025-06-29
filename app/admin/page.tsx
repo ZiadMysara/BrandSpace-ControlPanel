@@ -35,69 +35,6 @@ import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Progress } from "@/components/ui/progress"
 
-// Sample data for charts - Falcon colors
-const monthlyData = [
-  { month: "Jan", inquiries: 45, bookings: 12, revenue: 125000, visitors: 2400 },
-  { month: "Feb", inquiries: 52, bookings: 18, revenue: 180000, visitors: 2800 },
-  { month: "Mar", inquiries: 48, bookings: 15, revenue: 165000, visitors: 2600 },
-  { month: "Apr", inquiries: 61, bookings: 22, revenue: 220000, visitors: 3200 },
-  { month: "May", inquiries: 55, bookings: 19, revenue: 195000, visitors: 2900 },
-  { month: "Jun", inquiries: 67, bookings: 25, revenue: 275000, visitors: 3400 },
-]
-
-const pieData = [
-  { name: "Available", value: 45, color: "#3b82f6" },
-  { name: "Rented", value: 30, color: "#10b981" },
-  { name: "Reserved", value: 15, color: "#f97316" }, // Orange instead of yellow
-  { name: "Maintenance", value: 10, color: "#ef4444" },
-]
-
-const recentActivities = [
-  {
-    id: 1,
-    user: "Ahmed Al-Rashid",
-    action: "Created new inquiry",
-    target: "Mall Plaza Shop #205",
-    time: "2 minutes ago",
-    avatar: "AR",
-    type: "inquiry",
-  },
-  {
-    id: 2,
-    user: "Sarah Johnson",
-    action: "Completed payment",
-    target: "$25,000 monthly rent",
-    time: "15 minutes ago",
-    avatar: "SJ",
-    type: "payment",
-  },
-  {
-    id: 3,
-    user: "Mohammed Al-Fahad",
-    action: "Updated shop status",
-    target: "Shop #101 to Available",
-    time: "1 hour ago",
-    avatar: "MF",
-    type: "update",
-  },
-  {
-    id: 4,
-    user: "Fatima Al-Zahra",
-    action: "Scheduled viewing",
-    target: "Riyadh Grand Mall",
-    time: "2 hours ago",
-    avatar: "FZ",
-    type: "booking",
-  },
-]
-
-const topShops = [
-  { name: "Nike Sports Store", mall: "Riyadh Grand Mall", revenue: "$45,000", growth: "+12%", status: "rented" },
-  { name: "Apple Store", mall: "Jeddah Commercial Center", revenue: "$38,500", growth: "+8%", status: "rented" },
-  { name: "Zara Fashion", mall: "Dammam New Mall", revenue: "$32,000", growth: "+15%", status: "rented" },
-  { name: "Starbucks Cafe", mall: "Riyadh Grand Mall", revenue: "$28,000", growth: "+5%", status: "rented" },
-]
-
 interface DashboardStats {
   totalMalls: number
   totalShops: number
@@ -107,6 +44,16 @@ interface DashboardStats {
   activeUsers: number
   occupancyRate: number
   monthlyGrowth: number
+}
+
+interface RecentActivity {
+  id: number
+  user: string
+  action: string
+  target: string
+  time: string
+  avatar: string
+  type: string
 }
 
 export default function FalconDashboard() {
@@ -121,10 +68,12 @@ export default function FalconDashboard() {
     occupancyRate: 0,
     monthlyGrowth: 0,
   })
+  const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     fetchDashboardStats()
+    fetchRecentActivities()
   }, [])
 
   const fetchDashboardStats = async () => {
@@ -162,6 +111,83 @@ export default function FalconDashboard() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const fetchRecentActivities = async () => {
+    try {
+      // Fetch recent inquiries and bookings for activity feed
+      const [inquiriesResult, bookingsResult] = await Promise.all([
+        supabase
+          .from("inquiries")
+          .select(`
+            id,
+            inquiry_type,
+            created_at,
+            users (user_name),
+            shops (title)
+          `)
+          .order("created_at", { ascending: false })
+          .limit(5),
+        supabase
+          .from("bookings")
+          .select(`
+            id,
+            booking_type,
+            created_at,
+            users (user_name),
+            shops (title)
+          `)
+          .order("created_at", { ascending: false })
+          .limit(5),
+      ])
+
+      const activities: RecentActivity[] = []
+
+      // Add inquiries to activities
+      inquiriesResult.data?.forEach((inquiry) => {
+        activities.push({
+          id: inquiry.id,
+          user: inquiry.users?.user_name || "Unknown User",
+          action: "Created new inquiry",
+          target: inquiry.shops?.title || "Unknown Shop",
+          time: new Date(inquiry.created_at).toLocaleString(),
+          avatar: inquiry.users?.user_name?.substring(0, 2).toUpperCase() || "UN",
+          type: "inquiry",
+        })
+      })
+
+      // Add bookings to activities
+      bookingsResult.data?.forEach((booking) => {
+        activities.push({
+          id: booking.id,
+          user: booking.users?.user_name || "Unknown User",
+          action: "Created new booking",
+          target: booking.shops?.title || "Unknown Shop",
+          time: new Date(booking.created_at).toLocaleString(),
+          avatar: booking.users?.user_name?.substring(0, 2).toUpperCase() || "UN",
+          type: "booking",
+        })
+      })
+
+      // Sort by most recent and take top 10
+      activities.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
+      setRecentActivities(activities.slice(0, 10))
+    } catch (error) {
+      console.error("Error fetching recent activities:", error)
+    }
+  }
+
+  // Shop status distribution data from database
+  const getShopStatusData = () => {
+    if (!stats.totalShops) return []
+    
+    const rentedShops = Math.round((stats.occupancyRate / 100) * stats.totalShops)
+    const availableShops = stats.totalShops - rentedShops
+    
+    return [
+      { name: "Available", value: Math.round((availableShops / stats.totalShops) * 100), color: "#3b82f6" },
+      { name: "Rented", value: stats.occupancyRate, color: "#10b981" },
+    ]
   }
 
   return (
@@ -203,7 +229,7 @@ export default function FalconDashboard() {
               iconColor="text-purple-600"
             />
             <FalconMetricCard
-              title={locale === "ar" ? "الإيرادات الشهرية" : "Monthly Revenue"}
+              title={locale === "ar" ? "الإيرادات الإجمالية" : "Total Revenue"}
               value={loading ? "..." : `$${stats.totalRevenue.toLocaleString()}`}
               change={{ value: `+${stats.monthlyGrowth}%`, type: "positive" }}
               icon={DollarSign}
@@ -212,91 +238,7 @@ export default function FalconDashboard() {
           </div>
 
           {/* Charts Row - Falcon style */}
-          <div className="falcon-grid falcon-grid-3 mb-8">
-            {/* Revenue Chart */}
-            <div className="lg:col-span-2">
-              <Card className="falcon-card h-full">
-                <CardHeader className="falcon-card-header">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="falcon-card-title">
-                        {locale === "ar" ? "الإيرادات والحجوزات" : "Revenue & Bookings"}
-                      </CardTitle>
-                      <CardDescription className="falcon-card-description">
-                        {locale === "ar" ? "الأداء خلال الأشهر الستة الماضية" : "Performance over the last 6 months"}
-                      </CardDescription>
-                    </div>
-                    <Button variant="ghost" size="sm" className="hover:bg-slate-100">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent className="falcon-card-content p-0">
-                  <div className="h-80 w-full p-4">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={monthlyData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                        <defs>
-                          <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                            <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                          </linearGradient>
-                          <linearGradient id="colorBookings" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                            <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                        <XAxis dataKey="month" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
-                        <YAxis
-                          stroke="#64748b"
-                          fontSize={12}
-                          tickLine={false}
-                          axisLine={false}
-                          tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
-                        />
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: "white",
-                            border: "1px solid #e2e8f0",
-                            borderRadius: "12px",
-                            boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
-                          }}
-                          formatter={(value, name) => [
-                            name === "revenue" ? `$${Number(value).toLocaleString()}` : value,
-                            name === "revenue"
-                              ? locale === "ar"
-                                ? "الإيرادات"
-                                : "Revenue"
-                              : locale === "ar"
-                                ? "الحجوزات"
-                                : "Bookings",
-                          ]}
-                        />
-                        <Area
-                          type="monotone"
-                          dataKey="revenue"
-                          stroke="#3b82f6"
-                          strokeWidth={2}
-                          fillOpacity={1}
-                          fill="url(#colorRevenue)"
-                          name="revenue"
-                        />
-                        <Area
-                          type="monotone"
-                          dataKey="bookings"
-                          stroke="#10b981"
-                          strokeWidth={2}
-                          fillOpacity={1}
-                          fill="url(#colorBookings)"
-                          name="bookings"
-                        />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
+          <div className="falcon-grid falcon-grid-2 mb-8">
             {/* Shop Status Distribution */}
             <Card className="falcon-card">
               <CardHeader className="falcon-card-header">
@@ -306,28 +248,34 @@ export default function FalconDashboard() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="falcon-card-content">
-                <div className="h-64">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={pieData}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={60}
-                        outerRadius={100}
-                        paddingAngle={2}
-                        dataKey="value"
-                      >
-                        {pieData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
+                {stats.totalShops > 0 ? (
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={getShopStatusData()}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={60}
+                          outerRadius={100}
+                          paddingAngle={2}
+                          dataKey="value"
+                        >
+                          {getShopStatusData().map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                ) : (
+                  <div className="h-64 flex items-center justify-center text-slate-500">
+                    {locale === "ar" ? "لا توجد بيانات متاحة" : "No data available"}
+                  </div>
+                )}
                 <div className="mt-4 space-y-2">
-                  {pieData.map((item, index) => (
+                  {getShopStatusData().map((item, index) => (
                     <div key={index} className="flex items-center justify-between">
                       <div className="flex items-center">
                         <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: item.color }} />
@@ -339,10 +287,7 @@ export default function FalconDashboard() {
                 </div>
               </CardContent>
             </Card>
-          </div>
 
-          {/* Bottom Row - Falcon style */}
-          <div className="falcon-grid falcon-grid-2 mb-8">
             {/* Recent Activity */}
             <Card className="falcon-card">
               <CardHeader className="falcon-card-header">
@@ -357,63 +302,34 @@ export default function FalconDashboard() {
               </CardHeader>
               <CardContent className="falcon-card-content">
                 <div className="space-y-4">
-                  {recentActivities.map((activity) => (
-                    <div key={activity.id} className="flex items-start space-x-3">
-                      <Avatar className="h-8 w-8 falcon-avatar">
-                        <AvatarFallback className="bg-blue-100 text-blue-700 text-xs">{activity.avatar}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-slate-900">
-                          <span className="font-medium">{activity.user}</span>{" "}
-                          <span className="text-slate-600">{activity.action}</span>
-                        </p>
-                        <p className="text-sm text-slate-600">{activity.target}</p>
-                        <p className="text-xs text-slate-500 mt-1">{activity.time}</p>
-                      </div>
-                      <div
-                        className={cn(
-                          "w-2 h-2 rounded-full mt-2",
-                          activity.type === "inquiry" && "bg-blue-500",
-                          activity.type === "payment" && "bg-green-500",
-                          activity.type === "update" && "bg-orange-500",
-                          activity.type === "booking" && "bg-purple-500",
-                        )}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Top Performing Shops */}
-            <Card className="falcon-card">
-              <CardHeader className="falcon-card-header">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="falcon-card-title">
-                    {locale === "ar" ? "أفضل المحلات أداءً" : "Top Performing Shops"}
-                  </CardTitle>
-                  <Button variant="ghost" size="sm" className="text-blue-600 hover:bg-blue-50">
-                    {locale === "ar" ? "عرض التفاصيل" : "View Details"}
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="falcon-card-content">
-                <div className="space-y-4">
-                  {topShops.map((shop, index) => (
-                    <div key={index} className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-slate-900">{shop.name}</p>
-                        <p className="text-xs text-slate-500">{shop.mall}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm font-medium text-slate-900">{shop.revenue}</p>
-                        <div className="flex items-center">
-                          <ArrowUpRight className="h-3 w-3 text-green-600 mr-1" />
-                          <span className="text-xs text-green-600">{shop.growth}</span>
+                  {recentActivities.length > 0 ? (
+                    recentActivities.map((activity) => (
+                      <div key={activity.id} className="flex items-start space-x-3">
+                        <Avatar className="h-8 w-8 falcon-avatar">
+                          <AvatarFallback className="bg-blue-100 text-blue-700 text-xs">{activity.avatar}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-slate-900">
+                            <span className="font-medium">{activity.user}</span>{" "}
+                            <span className="text-slate-600">{activity.action}</span>
+                          </p>
+                          <p className="text-sm text-slate-600">{activity.target}</p>
+                          <p className="text-xs text-slate-500 mt-1">{activity.time}</p>
                         </div>
+                        <div
+                          className={cn(
+                            "w-2 h-2 rounded-full mt-2",
+                            activity.type === "inquiry" && "bg-blue-500",
+                            activity.type === "booking" && "bg-green-500",
+                          )}
+                        />
                       </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8 text-slate-500">
+                      {locale === "ar" ? "لا توجد أنشطة حديثة" : "No recent activities"}
                     </div>
-                  ))}
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -462,9 +378,9 @@ export default function FalconDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-slate-600">
-                      {locale === "ar" ? "المعاينات المجدولة" : "Scheduled Viewings"}
+                      {locale === "ar" ? "إجمالي الحجوزات" : "Total Bookings"}
                     </p>
-                    <p className="text-2xl font-bold text-slate-900">24</p>
+                    <p className="text-2xl font-bold text-slate-900">{stats.totalBookings}</p>
                   </div>
                   <Eye className="h-8 w-8 text-purple-600" />
                 </div>
