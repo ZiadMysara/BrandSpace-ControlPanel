@@ -111,51 +111,50 @@ interface FalconSidebarProps {
 export function FalconSidebar({ locale, onLocaleChange }: FalconSidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isMobileOpen, setIsMobileOpen] = useState(false)
-  const [isMobile, setIsMobile] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
   const pathname = usePathname()
 
-  // Check if screen is mobile and update body class for sidebar state
+  // Handle mounting to prevent hydration mismatch
   useEffect(() => {
-    const checkScreenSize = () => {
-      const mobile = window.innerWidth < 1024
-      setIsMobile(mobile)
-      if (mobile) {
-        setIsCollapsed(false) // Always expanded on mobile when open
-        setIsMobileOpen(false) // Closed by default on mobile
-      } else {
-        setIsMobileOpen(false) // Not relevant for desktop
-      }
-    }
-
-    checkScreenSize()
-    window.addEventListener('resize', checkScreenSize)
-    return () => window.removeEventListener('resize', checkScreenSize)
+    setIsMounted(true)
   }, [])
 
-  // Update content margin based on sidebar state
+  // Update CSS custom property for sidebar state
   useEffect(() => {
-    const sidebarContent = document.querySelector('.sidebar-content')
-    if (sidebarContent && !isMobile) {
-      if (isCollapsed) {
-        sidebarContent.classList.add('collapsed')
-      } else {
-        sidebarContent.classList.remove('collapsed')
-      }
+    if (isMounted) {
+      document.documentElement.style.setProperty(
+        '--sidebar-width',
+        isCollapsed ? '64px' : '288px'
+      )
     }
-  }, [isCollapsed, isMobile])
+  }, [isCollapsed, isMounted])
 
   const toggleSidebar = () => {
-    if (isMobile) {
-      setIsMobileOpen(!isMobileOpen)
-    } else {
-      setIsCollapsed(!isCollapsed)
-    }
+    setIsCollapsed(!isCollapsed)
+  }
+
+  const toggleMobileSidebar = () => {
+    setIsMobileOpen(!isMobileOpen)
+  }
+
+  // Don't render until mounted to prevent hydration mismatch
+  if (!isMounted) {
+    return null
   }
 
   return (
     <>
+      {/* Mobile Menu Button - Fixed position */}
+      <Button
+        onClick={toggleMobileSidebar}
+        className="fixed top-4 left-4 z-50 lg:hidden bg-blue-600 hover:bg-blue-700 text-white shadow-lg"
+        size="icon"
+      >
+        <Menu className="h-5 w-5" />
+      </Button>
+
       {/* Mobile Overlay */}
-      {isMobile && isMobileOpen && (
+      {isMobileOpen && (
         <div 
           className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 lg:hidden" 
           onClick={() => setIsMobileOpen(false)}
@@ -165,13 +164,12 @@ export function FalconSidebar({ locale, onLocaleChange }: FalconSidebarProps) {
       {/* Sidebar */}
       <div
         className={cn(
-          "fixed left-0 top-0 z-40 h-full bg-white border-r border-slate-200 transition-all duration-300 ease-in-out shadow-lg",
+          "fixed left-0 top-0 z-50 h-full bg-white border-r border-slate-200 transition-all duration-300 ease-in-out shadow-lg",
           // Desktop behavior
           "lg:translate-x-0",
-          isCollapsed && !isMobile ? "lg:w-16" : "lg:w-72",
+          isCollapsed ? "lg:w-16" : "lg:w-72",
           // Mobile behavior
-          isMobile && isMobileOpen ? "translate-x-0 w-72" : "lg:translate-x-0",
-          isMobile && !isMobileOpen ? "-translate-x-full" : "",
+          isMobileOpen ? "translate-x-0 w-72" : "-translate-x-full w-72 lg:translate-x-0",
           locale === "ar" && "right-0 left-auto"
         )}
       >
@@ -179,10 +177,9 @@ export function FalconSidebar({ locale, onLocaleChange }: FalconSidebarProps) {
           locale={locale}
           onLocaleChange={onLocaleChange}
           pathname={pathname}
-          isCollapsed={isCollapsed && !isMobile}
+          isCollapsed={isCollapsed}
           onToggle={toggleSidebar}
-          isMobile={isMobile}
-          isMobileOpen={isMobileOpen}
+          onMobileClose={() => setIsMobileOpen(false)}
         />
       </div>
     </>
@@ -195,8 +192,7 @@ interface SidebarContentProps {
   pathname: string
   isCollapsed: boolean
   onToggle: () => void
-  isMobile: boolean
-  isMobileOpen: boolean
+  onMobileClose: () => void
 }
 
 function SidebarContent({
@@ -205,8 +201,7 @@ function SidebarContent({
   pathname,
   isCollapsed,
   onToggle,
-  isMobile,
-  isMobileOpen,
+  onMobileClose,
 }: SidebarContentProps) {
   const { theme, setTheme } = useTheme()
   const navGroups = locale === "ar" ? navigationGroupsAr : navigationGroups
@@ -215,20 +210,8 @@ function SidebarContent({
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-slate-100">
-        {/* Mobile Menu Button - Integrated into header */}
-        {isMobile && (
-          <Button
-            onClick={onToggle}
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-slate-500 hover:text-slate-700 hover:bg-slate-100 lg:hidden"
-          >
-            {isMobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-          </Button>
-        )}
-        
         {!isCollapsed && (
-          <div className={cn("flex items-center space-x-3", isMobile && "ml-3")}>
+          <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
               <Zap className="w-5 h-5 text-white" />
             </div>
@@ -239,17 +222,25 @@ function SidebarContent({
           </div>
         )}
         
-        {/* Desktop Toggle Button */}
-        {!isMobile && (
-          <Button
-            onClick={onToggle}
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-slate-500 hover:text-slate-700 hover:bg-slate-100"
-          >
-            <Menu className="h-4 w-4" />
-          </Button>
-        )}
+        {/* Toggle Button - Hidden on mobile */}
+        <Button
+          onClick={onToggle}
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 text-slate-500 hover:text-slate-700 hover:bg-slate-100 hidden lg:flex"
+        >
+          <Menu className="h-4 w-4" />
+        </Button>
+
+        {/* Mobile Close Button */}
+        <Button
+          onClick={onMobileClose}
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 text-slate-500 hover:text-slate-700 hover:bg-slate-100 lg:hidden"
+        >
+          <X className="h-4 w-4" />
+        </Button>
       </div>
 
       {/* Search - Only show when not collapsed */}
@@ -281,6 +272,7 @@ function SidebarContent({
                   <Link
                     key={item.href}
                     href={item.href}
+                    onClick={onMobileClose}
                     className={cn(
                       "flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200",
                       "hover:bg-slate-50 hover:text-slate-900",
