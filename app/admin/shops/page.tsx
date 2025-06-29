@@ -86,7 +86,6 @@ export default function ShopsPage() {
   const [shops, setShops] = useState<Shop[]>([])
   const [malls, setMalls] = useState<Mall[]>([])
   const [categoryTypes, setCategoryTypes] = useState<CategoryType[]>([])
-  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [filterStatus, setFilterStatus] = useState<string>("all")
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
@@ -125,7 +124,6 @@ export default function ShopsPage() {
 
   const fetchShops = async () => {
     try {
-      setLoading(true)
       const { data, error } = await supabase
         .from("shops")
         .select(`
@@ -144,8 +142,6 @@ export default function ShopsPage() {
         description: "Failed to fetch shops",
         variant: "destructive",
       })
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -749,13 +745,7 @@ export default function ShopsPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {loading ? (
-                      <TableRow>
-                        <TableCell colSpan={8} className="text-center py-8 text-slate-500">
-                          {locale === "ar" ? "جاري التحميل..." : "Loading..."}
-                        </TableCell>
-                      </TableRow>
-                    ) : filteredShops.length === 0 ? (
+                    {filteredShops.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={8} className="text-center py-8 text-slate-500">
                           {locale === "ar" ? "لا توجد محلات" : "No shops found"}
