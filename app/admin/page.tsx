@@ -34,6 +34,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Progress } from "@/components/ui/progress"
+import { ChartDebug } from "@/components/chart-debug"
 
 // Sample data for charts - Falcon colors
 const monthlyData = [
@@ -179,6 +180,9 @@ export default function FalconDashboard() {
 
         {/* Main content */}
         <main className="falcon-main p-6">
+          {/* Temporary debug component */}
+          <ChartDebug />
+
           {/* Top Metrics - Exact Falcon style */}
           <div className="falcon-grid falcon-grid-4 mb-8">
             <FalconMetricCard
@@ -322,7 +326,7 @@ export default function FalconDashboard() {
                           <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
                       </Pie>
-                      <Tooltip />
+                      <Tooltip formatter={(value) => [`${value}%`, "Percentage"]} />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>

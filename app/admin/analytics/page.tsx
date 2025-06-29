@@ -182,9 +182,9 @@ export default function AnalyticsPage() {
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="falcon-card-content">
-                      <div className="h-80 w-full min-h-[320px]">
+                      <div className="h-80 w-full">
                         <ResponsiveContainer width="100%" height="100%">
-                          <AreaChart data={performanceData}>
+                          <AreaChart data={performanceData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                             <defs>
                               <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
@@ -205,6 +205,16 @@ export default function AnalyticsPage() {
                                 borderRadius: "12px",
                                 boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
                               }}
+                              formatter={(value, name) => [
+                                value,
+                                name === "users"
+                                  ? locale === "ar"
+                                    ? "المستخدمين"
+                                    : "Users"
+                                  : locale === "ar"
+                                    ? "الجلسات"
+                                    : "Sessions",
+                              ]}
                             />
                             <Area
                               type="monotone"
@@ -213,7 +223,7 @@ export default function AnalyticsPage() {
                               strokeWidth={2}
                               fillOpacity={1}
                               fill="url(#colorUsers)"
-                              name={locale === "ar" ? "المستخدمين" : "Users"}
+                              name="users"
                             />
                             <Area
                               type="monotone"
@@ -222,7 +232,7 @@ export default function AnalyticsPage() {
                               strokeWidth={2}
                               fillOpacity={1}
                               fill="url(#colorSessions)"
-                              name={locale === "ar" ? "الجلسات" : "Sessions"}
+                              name="sessions"
                             />
                           </AreaChart>
                         </ResponsiveContainer>
@@ -238,7 +248,7 @@ export default function AnalyticsPage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="falcon-card-content">
-                    <div className="h-64 w-full min-h-[256px]">
+                    <div className="h-64 w-full">
                       <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
                           <Pie
@@ -254,7 +264,7 @@ export default function AnalyticsPage() {
                               <Cell key={`cell-${index}`} fill={entry.color} />
                             ))}
                           </Pie>
-                          <Tooltip />
+                          <Tooltip formatter={(value) => [`${value}%`, "Traffic"]} />
                         </PieChart>
                       </ResponsiveContainer>
                     </div>
@@ -282,7 +292,7 @@ export default function AnalyticsPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="falcon-card-content">
-                  <div className="falcon-chart-container">
+                  <div className="h-96 w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={performanceData}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
@@ -305,7 +315,7 @@ export default function AnalyticsPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="falcon-card-content">
-                  <div className="falcon-chart-container">
+                  <div className="h-96 w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={revenueData}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
@@ -343,7 +353,7 @@ export default function AnalyticsPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="falcon-card-content">
-                  <div className="falcon-chart-container">
+                  <div className="h-96 w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <LineChart data={performanceData}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
