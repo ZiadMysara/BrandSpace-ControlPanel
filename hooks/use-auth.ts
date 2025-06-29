@@ -47,27 +47,13 @@ export function useAuth() {
 // JWT utility functions
 const JWT_SECRET = "brandspace-secret-key-2024"
 
-// Helper functions for base64 encoding/decoding that work in both browser and Node.js
+// Helper functions for base64 encoding/decoding using browser APIs
 function base64Encode(str: string): string {
-  if (typeof window !== 'undefined') {
-    // Browser environment - use btoa directly
-    return btoa(str)
-  } else {
-    // Node.js environment - dynamically require Buffer
-    const { Buffer } = require('buffer')
-    return Buffer.from(str).toString('base64')
-  }
+  return btoa(str)
 }
 
 function base64Decode(str: string): string {
-  if (typeof window !== 'undefined') {
-    // Browser environment - use atob directly
-    return atob(str)
-  } else {
-    // Node.js environment - dynamically require Buffer
-    const { Buffer } = require('buffer')
-    return Buffer.from(str, 'base64').toString('utf8')
-  }
+  return atob(str)
 }
 
 function createJWT(payload: any): string {
