@@ -16,7 +16,6 @@ import {
   Clock,
   ArrowUpRight,
   MoreHorizontal,
-  AlertCircle,
 } from "lucide-react"
 import {
   XAxis,
@@ -30,12 +29,11 @@ import {
   Area,
   AreaChart,
 } from "recharts"
-import { supabase, isSupabaseConfigured } from "@/lib/supabase"
+import { supabase } from "@/lib/supabase"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Progress } from "@/components/ui/progress"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 
 // Sample data for charts - Falcon colors
 const monthlyData = [
@@ -111,23 +109,19 @@ interface DashboardStats {
   monthlyGrowth: number
 }
 
-// Mock data for when Supabase is not configured
-const mockStats: DashboardStats = {
-  totalMalls: 12,
-  totalShops: 156,
-  totalBookings: 89,
-  totalRevenue: 275000,
-  recentInquiries: 23,
-  activeUsers: 145,
-  occupancyRate: 78,
-  monthlyGrowth: 12.5,
-}
-
 export default function FalconDashboard() {
   const [locale, setLocale] = useState<"en" | "ar">("en")
-  const [stats, setStats] = useState<DashboardStats>(mockStats)
+  const [stats, setStats] = useState<DashboardStats>({
+    totalMalls: 0,
+    totalShops: 0,
+    totalBookings: 0,
+    totalRevenue: 0,
+    recentInquiries: 0,
+    activeUsers: 0,
+    occupancyRate: 0,
+    monthlyGrowth: 0,
+  })
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     fetchDashboardStats()
@@ -136,14 +130,6 @@ export default function FalconDashboard() {
   const fetchDashboardStats = async () => {
     try {
       setLoading(true)
-      setError(null)
-
-      if (!isSupabaseConfigured) {
-        // Use mock data when Supabase is not configured
-        setStats(mockStats)
-        setError("Supabase not configured - showing demo data")
-        return
-      }
 
       // Fetch stats from Supabase
       const [mallsResult, shopsResult, bookingsResult, inquiriesResult, usersResult] = await Promise.all([
@@ -173,9 +159,6 @@ export default function FalconDashboard() {
       })
     } catch (error) {
       console.error("Error fetching dashboard stats:", error)
-      setError("Failed to fetch data from database")
-      // Fallback to mock data on error
-      setStats(mockStats)
     } finally {
       setLoading(false)
     }
@@ -196,35 +179,6 @@ export default function FalconDashboard() {
 
         {/* Main content */}
         <main className="falcon-main p-6">
-          {/* Supabase Configuration Alert */}
-          {!isSupabaseConfigured && (
-            <Alert className="mb-6 border-orange-200 bg-orange-50">
-              <AlertCircle className="h-4 w-4 text-orange-600" />
-              <AlertDescription className="text-orange-800">
-                <strong>Demo Mode:</strong> Supabase is not configured. Please update your{" "}
-                <code className="bg-orange-100 px-1 rounded">.env.local</code> file with your actual Supabase project URL and API key to connect to your database.{" "}
-                <a 
-                  href="https://supabase.com/dashboard" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="underline hover:no-underline"
-                >
-                  Get your credentials from Supabase Dashboard
-                </a>
-              </AlertDescription>
-            </Alert>
-          )}
-
-          {/* Error Alert */}
-          {error && error !== "Supabase not configured - showing demo data" && (
-            <Alert className="mb-6 border-red-200 bg-red-50">
-              <AlertCircle className="h-4 w-4 text-red-600" />
-              <AlertDescription className="text-red-800">
-                <strong>Error:</strong> {error}. Showing demo data instead.
-              </AlertDescription>
-            </Alert>
-          )}
-
           {/* Top Metrics - Exact Falcon style */}
           <div className="falcon-grid falcon-grid-4 mb-8">
             <FalconMetricCard
