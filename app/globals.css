@@ -728,18 +728,22 @@ body * {
   @apply bg-white border border-slate-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200;
 }
 
-.brandspace-button-primary {
-  @apply bg-[#1a365d] hover:bg-[#2c5282] text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200;
-}
+@layer components {
+  /* brand buttons */
+  .brandspace-button-primary {
+    @apply bg-[#1a365d] hover:bg-[#2c5282] text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200;
+  }
 
-.brandspace-button-accent {
-  @apply bg-[#e53e3e] hover:bg-[#c53030] text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200;
-}
+  .brandspace-button-accent {
+    @apply bg-[#e53e3e] hover:bg-[#c53030] text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200;
+  }
 
-.brandspace-text-primary {
-  @apply text-[#1a365d];
-}
+  /* brand text helpers */
+  .brandspace-text-primary {
+    @apply text-[#1a365d];
+  }
 
-.brandspace-text-accent {
-  @apply text-[#e53e3e];
+  .brandspace-text-accent {
+    @apply text-[#e53e3e];
+  }
 }
