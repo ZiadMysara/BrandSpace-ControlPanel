@@ -1,6 +1,8 @@
 "use client"
 
-import React, { createContext, useContext, useState, useEffect } from "react"
+import type React from "react"
+
+import { useState, useEffect, createContext, useContext } from "react"
 import { useRouter } from "next/navigation"
 
 interface User {
@@ -42,53 +44,85 @@ export function useAuth() {
   return context
 }
 
-// Simple token management without complex JWT
-function createToken(user: User): string {
-  const tokenData = {
-    user,
-    exp: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
-  }
-  return JSON.stringify(tokenData)
+// JWT utility functions
+const JWT_SECRET = "brandspace-secret-key-2024"
+
+function createJWT(payload: any): string {
+  const header = { alg: "HS256", typ: "JWT" }
+  const encodedHeader = btoa(JSON.stringify(header))
+  const encodedPayload = btoa(JSON.stringify(payload))
+  const signature = btoa(`${encodedHeader}.${encodedPayload}.${JWT_SECRET}`)
+  return `${encodedHeader}.${encodedPayload}.${signature}`
 }
 
-function verifyToken(token: string): User | null {
+function verifyJWT(token: string): any {
   try {
-    const tokenData = JSON.parse(token)
-    if (tokenData.exp && Date.now() >= tokenData.exp) {
+    const parts = token.split(".")
+    if (parts.length !== 3) return null
+
+    const payload = JSON.parse(atob(parts[1]))
+
+    // Check expiration
+    if (payload.exp && Date.now() >= payload.exp * 1000) {
       return null
     }
-    return tokenData.user
+
+    return payload
   } catch {
     return null
   }
 }
 
-// Mock authentication
+// Mock authentication functions
 async function mockLogin(email: string, password: string): Promise<{ success: boolean; user?: User; error?: string }> {
+  // Simulate API delay
   await new Promise((resolve) => setTimeout(resolve, 1000))
 
+  // Test credentials
   if (email === "test@example.com" && password === "password123") {
     const user: User = {
       id: 1,
       name: "Test Admin",
       email: "test@example.com",
       phone: "+966501234567",
-      userType: 1,
-      userPosition: 1,
+      userType: 1, // Super Admin
+      userPosition: 1, // CEO
       isVerified: true,
       isActive: true,
     }
     return { success: true, user }
   }
 
-  return { success: false, error: "Invalid credentials" }
+  // Check if user exists in localStorage (for demo purposes)
+  const users = JSON.parse(localStorage.getItem("brandspace_users") || "[]")
+  const user = users.find((u: any) => u.email === email)
+
+  if (!user) {
+    return { success: false, error: "User not found" }
+  }
+
+  if (user.password !== password) {
+    return { success: false, error: "Invalid password" }
+  }
+
+  return { success: true, user: { ...user, password: undefined } }
 }
 
 async function mockSignup(userData: SignupData): Promise<{ success: boolean; user?: User; error?: string }> {
+  // Simulate API delay
   await new Promise((resolve) => setTimeout(resolve, 1500))
 
+  // Check if user already exists
+  const users = JSON.parse(localStorage.getItem("brandspace_users") || "[]")
+  const existingUser = users.find((u: any) => u.email === userData.email)
+
+  if (existingUser) {
+    return { success: false, error: "User already exists with this email" }
+  }
+
+  // Create new user
   const newUser: User = {
-    id: Date.now(),
+    id: Date.now(), // Simple ID generation
     name: userData.name,
     email: userData.email,
     phone: userData.phone,
@@ -97,6 +131,11 @@ async function mockSignup(userData: SignupData): Promise<{ success: boolean; use
     isVerified: false,
     isActive: true,
   }
+
+  // Save to localStorage (for demo purposes)
+  const userWithPassword = { ...newUser, password: userData.password }
+  users.push(userWithPassword)
+  localStorage.setItem("brandspace_users", JSON.stringify(users))
 
   return { success: true, user: newUser }
 }
@@ -107,11 +146,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter()
 
   useEffect(() => {
+    // Check for existing token on mount
     const token = localStorage.getItem("brandspace_token")
     if (token) {
-      const userData = verifyToken(token)
-      if (userData) {
-        setUser(userData)
+      const payload = verifyJWT(token)
+      if (payload && payload.user) {
+        setUser(payload.user)
       } else {
         localStorage.removeItem("brandspace_token")
       }
@@ -125,7 +165,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const result = await mockLogin(email, password)
 
       if (result.success && result.user) {
-        const token = createToken(result.user)
+        const token = createJWT({
+          user: result.user,
+          exp: Math.floor(Date.now() / 1000) + 24 * 60 * 60, // 24 hours
+        })
+
         localStorage.setItem("brandspace_token", token)
         setUser(result.user)
         return { success: true }
@@ -143,7 +187,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true)
     try {
       const result = await mockSignup(userData)
-      return result.success ? { success: true } : { success: false, error: result.error }
+
+      if (result.success && result.user) {
+        return { success: true }
+      }
+
+      return { success: false, error: result.error }
     } catch (error) {
       return { success: false, error: "Signup failed" }
     } finally {

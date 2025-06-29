@@ -1,6 +1,8 @@
 "use client"
 
-import React, { useEffect } from "react"
+import type React from "react"
+
+import { useEffect } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import { useAuth } from "@/hooks/use-auth"
 import { Card, CardContent } from "@/components/ui/card"
@@ -21,11 +23,12 @@ export function AuthGuard({ children }: AuthGuardProps) {
     }
   }, [user, isLoading, router, pathname])
 
+  // Show loading screen while checking authentication
   if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <Card className="w-full max-w-md">
-          <CardContent className="p-8 text-center">
+        <Card className="falcon-card w-full max-w-md">
+          <CardContent className="falcon-card-content p-8 text-center">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-xl mb-4 animate-pulse">
               <Building2 className="w-8 h-8 text-white" />
             </div>
@@ -37,6 +40,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
     )
   }
 
+  // If user is not authenticated and not on auth pages, redirect will happen in useEffect
   if (!user && !pathname.startsWith("/auth")) {
     return null
   }
