@@ -14,8 +14,6 @@ import {
   ShoppingBag,
   Users,
   Bell,
-  Menu,
-  X,
   Globe,
   Sun,
   Moon,
@@ -111,47 +109,28 @@ interface FalconSidebarProps {
 export function FalconSidebar({ locale, onLocaleChange }: FalconSidebarProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const pathname = usePathname()
-  const { theme, setTheme } = useTheme()
 
   return (
     <>
-      {/* Enhanced Mobile Menu Button */}
-      <Button
-        variant="outline"
-        size="icon"
-        onClick={() => setSidebarOpen(true)}
-        className={cn(
-          "fixed top-6 z-50 lg:hidden",
-          "w-12 h-12 rounded-xl",
-          "bg-white/95 backdrop-blur-md border-slate-200/60 shadow-lg",
-          "hover:bg-white hover:shadow-xl hover:scale-105",
-          "active:scale-95 transition-all duration-200 ease-out",
-          "focus:ring-2 focus:ring-blue-500/20 focus:ring-offset-2",
-          "border-2 hover:border-slate-300",
-          locale === "ar" ? "right-6" : "left-6"
-        )}
-        aria-label={locale === "ar" ? "فتح القائمة" : "Open menu"}
-      >
-        <Menu className="h-5 w-5 text-slate-700" strokeWidth={2} />
-      </Button>
-
-      {/* Enhanced Mobile Overlay */}
-      {sidebarOpen && (
-        <div 
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden transition-all duration-300 ease-out" 
-          onClick={() => setSidebarOpen(false)}
-          aria-hidden="true"
-        />
-      )}
-
-      {/* Mobile Sidebar */}
+      {/* Sidebar Toggle Area - Invisible clickable area on the edge */}
       <div
         className={cn(
-          "fixed inset-y-0 z-50 w-80 transform transition-all duration-300 ease-out lg:hidden",
+          "fixed top-0 bottom-0 z-40 w-4 cursor-pointer",
+          "hover:bg-blue-500/10 transition-colors duration-200",
+          locale === "ar" ? "right-0" : "left-0"
+        )}
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        aria-label={locale === "ar" ? "فتح/إغلاق القائمة" : "Toggle sidebar"}
+      />
+
+      {/* Sidebar */}
+      <div
+        className={cn(
+          "fixed inset-y-0 z-50 w-80 transform transition-all duration-300 ease-out",
           "shadow-2xl",
-          sidebarOpen ? "translate-x-0 opacity-100" : "-translate-x-full opacity-0",
+          sidebarOpen ? "translate-x-0" : "-translate-x-full",
           locale === "ar" && "right-0 left-auto",
-          locale === "ar" && (sidebarOpen ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"),
+          locale === "ar" && (sidebarOpen ? "translate-x-0" : "translate-x-full"),
         )}
       >
         <SidebarContent
@@ -159,24 +138,18 @@ export function FalconSidebar({ locale, onLocaleChange }: FalconSidebarProps) {
           onLocaleChange={onLocaleChange}
           pathname={pathname}
           onClose={() => setSidebarOpen(false)}
-          isMobile={true}
+          isOpen={sidebarOpen}
         />
       </div>
 
-      {/* Desktop Sidebar */}
-      <div
-        className={cn(
-          "hidden lg:fixed lg:inset-y-0 lg:flex lg:w-80 lg:flex-col",
-          locale === "ar" && "lg:right-0 lg:left-auto",
-        )}
-      >
-        <SidebarContent 
-          locale={locale} 
-          onLocaleChange={onLocaleChange} 
-          pathname={pathname} 
-          isMobile={false}
+      {/* Content Overlay when sidebar is open */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 z-30 bg-black/20 backdrop-blur-sm transition-all duration-300 ease-out" 
+          onClick={() => setSidebarOpen(false)}
+          aria-hidden="true"
         />
-      </div>
+      )}
     </>
   )
 }
@@ -185,8 +158,8 @@ interface SidebarContentProps {
   locale: "en" | "ar"
   onLocaleChange: (locale: "en" | "ar") => void
   pathname: string
-  onClose?: () => void
-  isMobile: boolean
+  onClose: () => void
+  isOpen: boolean
 }
 
 function SidebarContent({
@@ -194,13 +167,13 @@ function SidebarContent({
   onLocaleChange,
   pathname,
   onClose,
-  isMobile,
+  isOpen,
 }: SidebarContentProps) {
   const { theme, setTheme } = useTheme()
   const navGroups = locale === "ar" ? navigationGroupsAr : navigationGroups
 
   return (
-    <div className="flex flex-col h-full bg-white/95 backdrop-blur-xl border-r border-slate-200/60 shadow-2xl">
+    <div className="flex flex-col h-full bg-white/98 backdrop-blur-xl border-r border-slate-200/60 shadow-2xl">
       {/* Enhanced Header */}
       <div className="flex items-center justify-between p-6 border-b border-slate-100/80 bg-gradient-to-r from-blue-50/50 to-indigo-50/50">
         <div className="flex items-center space-x-3">
@@ -215,16 +188,14 @@ function SidebarContent({
             <p className="text-sm text-slate-500 font-medium">Admin Panel</p>
           </div>
         </div>
-        {isMobile && (
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={onClose}
-            className="text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
-          >
-            <X className="h-5 w-5" strokeWidth={2} />
-          </Button>
-        )}
+        
+        {/* Close indicator */}
+        <div className="flex items-center space-x-2">
+          <div className="text-xs text-slate-400 font-medium">
+            {locale === "ar" ? "اضغط للإغلاق" : "Click to close"}
+          </div>
+          <div className="w-2 h-2 bg-slate-300 rounded-full animate-pulse"></div>
+        </div>
       </div>
 
       {/* Enhanced Search */}
